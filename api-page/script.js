@@ -3,6 +3,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     const body = document.body;
     body.classList.add("no-scroll");
 
+    // Check for saved theme preference
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('themeToggleBtn').innerHTML = '<i class="fas fa-sun"></i>';
+    }
+
+    // Theme toggle functionality
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDarkMode);
+        
+        // Update icon
+        document.getElementById('themeToggleBtn').innerHTML = isDarkMode ? 
+            '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    });
+
     try {
         const settings = await fetch('/src/settings.json').then(res => res.json());
 
@@ -11,14 +28,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (element) element[property] = value;
         };
         
+        // Set page content from settings
         setContent('page', 'textContent', settings.name || "Skyzopedia UI");
-        setContent('wm', 'textContent', `© 2025 ${settings.apiSettings.creator}. All rights reserved.` || "© 2025 Skyzopedia. All rights reserved.");
+        setContent('wm', 'textContent', `© ${new Date().getFullYear()} ${settings.apiSettings.creator}. All rights reserved.` || `© ${new Date().getFullYear()} Skyzopedia. All rights reserved.`);
         setContent('header', 'textContent', settings.name || "Skyzopedia UI");
         setContent('name', 'textContent', settings.name || "Skyzopedia UI");
         setContent('version', 'textContent', settings.version || "v1.0");
         setContent('versionHeader', 'textContent', settings.header.status || "Active!");
         setContent('description', 'textContent', settings.description || "Simple API's");
 
+        // Set links
         const apiLinksContainer = document.getElementById('apiLinks');
         if (apiLinksContainer && settings.links?.length) {
             settings.links.forEach(({ url, name }) => {
@@ -26,35 +45,69 @@ document.addEventListener('DOMContentLoaded', async () => {
                     href: url,
                     textContent: name,
                     target: '_blank',
-                    className: 'lead'
+                    className: 'api-link'
                 });
                 apiLinksContainer.appendChild(link);
             });
         }
 
+        // Create API content
         const apiContent = document.getElementById('apiContent');
         settings.categories.forEach((category) => {
             const sortedItems = category.items.sort((a, b) => a.name.localeCompare(b.name));
-            const categoryContent = sortedItems.map((item, index, array) => {
-                const isLastItem = index === array.length - 1;
-                const itemClass = `col-md-6 col-lg-4 api-item ${isLastItem ? 'mb-4' : 'mb-2'}`;
-                return `
-                    <div class="${itemClass}" data-name="${item.name}" data-desc="${item.desc}">
-                        <div class="hero-section d-flex align-items-center justify-content-between" style="height: 70px;">
-                            <div>
-                                <h5 class="mb-0" style="font-size: 16px;">${item.name}</h5>
-                                <p class="text-muted mb-0" style="font-size: 0.8rem;">${item.desc}</p>
-                            </div>
-                            <button class="btn btn-dark btn-sm get-api-btn" data-api-path="${item.path}" data-api-name="${item.name}" data-api-desc="${item.desc}">
-                                GET
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            apiContent.insertAdjacentHTML('beforeend', `<h3 class="mb-3 category-header" style="font-size: 21px; font-weight: 600;">${category.name}</h3><div class="row">${categoryContent}</div>`);
+            
+            const categoryElement = document.createElement('div');
+            categoryElement.className = 'category-section';
+            
+            const categoryHeader = document.createElement('h3');
+            categoryHeader.className = 'category-header';
+            categoryHeader.textContent = category.name;
+            categoryElement.appendChild(categoryHeader);
+            
+            const itemsRow = document.createElement('div');
+            itemsRow.className = 'row';
+            
+            sortedItems.forEach((item, index) => {
+                const itemCol = document.createElement('div');
+                itemCol.className = 'col-md-6 col-lg-4 api-item';
+                itemCol.dataset.name = item.name;
+                itemCol.dataset.desc = item.desc;
+                
+                const heroSection = document.createElement('div');
+                heroSection.className = 'hero-section';
+                
+                const infoDiv = document.createElement('div');
+                
+                const itemTitle = document.createElement('h5');
+                itemTitle.className = 'mb-0';
+                itemTitle.textContent = item.name;
+                
+                const itemDesc = document.createElement('p');
+                itemDesc.className = 'text-muted mb-0';
+                itemDesc.textContent = item.desc;
+                
+                infoDiv.appendChild(itemTitle);
+                infoDiv.appendChild(itemDesc);
+                
+                const getBtn = document.createElement('button');
+                getBtn.className = 'btn get-api-btn';
+                getBtn.textContent = 'GET';
+                getBtn.dataset.apiPath = item.path;
+                getBtn.dataset.apiName = item.name;
+                getBtn.dataset.apiDesc = item.desc;
+                
+                heroSection.appendChild(infoDiv);
+                heroSection.appendChild(getBtn);
+                
+                itemCol.appendChild(heroSection);
+                itemsRow.appendChild(itemCol);
+            });
+            
+            categoryElement.appendChild(itemsRow);
+            apiContent.appendChild(categoryElement);
         });
 
+        // Search functionality
         const searchInput = document.getElementById('searchInput');
         searchInput.addEventListener('input', () => {
             const searchTerm = searchInput.value.toLowerCase();
@@ -68,12 +121,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             categoryHeaders.forEach(header => {
-                const categoryRow = header.nextElementSibling;
+                const categorySection = header.closest('.category-section');
+                const categoryRow = categorySection.querySelector('.row');
                 const visibleItems = categoryRow.querySelectorAll('.api-item:not([style*="display: none"])');
-                header.style.display = visibleItems.length ? '' : 'none';
+                categorySection.style.display = visibleItems.length ? '' : 'none';
             });
         });
 
+        // API Button click handler
         document.addEventListener('click', event => {
             if (!event.target.classList.contains('get-api-btn')) return;
 
@@ -89,6 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 submitBtn: document.getElementById('submitQueryBtn')
             };
 
+            // Reset modal
             modalRefs.label.textContent = apiName;
             modalRefs.desc.textContent = apiDesc;
             modalRefs.content.textContent = '';
@@ -105,6 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let hasParams = params.toString().length > 0;
 
             if (hasParams) {
+                // Create input fields for parameters
                 const paramContainer = document.createElement('div');
                 paramContainer.className = 'param-container';
 
@@ -112,28 +169,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 paramsArray.forEach((param, index) => {
                     const paramGroup = document.createElement('div');
-                    paramGroup.className = index < paramsArray.length - 1 ? 'mb-2' : '';
+                    paramGroup.className = index < paramsArray.length - 1 ? 'mb-3' : '';
 
+                    // Create label
+                    const label = document.createElement('label');
+                    label.className = 'form-label';
+                    label.textContent = param;
+                    label.htmlFor = `param-${param}`;
+                    
+                    // Create input
                     const inputField = document.createElement('input');
                     inputField.type = 'text';
                     inputField.className = 'form-control';
-                    inputField.placeholder = `input ${param}...`;
+                    inputField.id = `param-${param}`;
+                    inputField.placeholder = `Enter ${param}...`;
                     inputField.dataset.param = param;
-
                     inputField.required = true;
                     inputField.addEventListener('input', validateInputs);
 
+                    paramGroup.appendChild(label);
                     paramGroup.appendChild(inputField);
                     paramContainer.appendChild(paramGroup);
                 });
                 
+                // Check for inner description
                 const currentItem = settings.categories
                     .flatMap(category => category.items)
                     .find(item => item.path === apiPath);
 
                 if (currentItem && currentItem.innerDesc) {
                     const innerDescDiv = document.createElement('div');
-                    innerDescDiv.className = 'text-muted mt-2';
+                    innerDescDiv.className = 'text-muted mt-3';
                     innerDescDiv.style.fontSize = '13px';
                     innerDescDiv.innerHTML = currentItem.innerDesc.replace(/\n/g, '<br>');
                     paramContainer.appendChild(innerDescDiv);
@@ -142,6 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 modalRefs.queryInputContainer.appendChild(paramContainer);
                 modalRefs.submitBtn.classList.remove('d-none');
 
+                // Submit button handler
                 modalRefs.submitBtn.onclick = async () => {
                     const inputs = modalRefs.queryInputContainer.querySelectorAll('input');
                     const newParams = new URLSearchParams();
@@ -158,8 +225,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
 
                     if (!isValid) {
-                        modalRefs.content.textContent = 'Please fill in all required fields.';
-                        modalRefs.content.classList.remove('d-none');
+                        const errorMsg = document.createElement('div');
+                        errorMsg.className = 'alert alert-danger mt-3';
+                        errorMsg.textContent = 'Please fill in all required fields.';
+                        
+                        // Remove existing error message if any
+                        const existingError = modalRefs.queryInputContainer.querySelector('.alert');
+                        if (existingError) existingError.remove();
+                        
+                        modalRefs.queryInputContainer.appendChild(errorMsg);
                         return;
                     }
 
@@ -176,6 +250,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             modal.show();
         });
 
+        // Input validation
         function validateInputs() {
             const submitBtn = document.getElementById('submitQueryBtn');
             const inputs = document.querySelectorAll('.param-container input');
@@ -183,6 +258,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             submitBtn.disabled = !isValid;
         }
 
+        // Handle API request
         async function handleApiRequest(apiUrl, modalRefs, apiName) {
             modalRefs.spinner.classList.remove('d-none');
             modalRefs.content.classList.add('d-none');
@@ -191,12 +267,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const response = await fetch(apiUrl);
 
                 if (!response.ok) {
-                    console.log(response)
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const contentType = response.headers.get('Content-Type');
                 if (contentType && contentType.startsWith('image/')) {
+                    // Handle image response
                     const blob = await response.blob();
                     const imageUrl = URL.createObjectURL(blob);
 
@@ -205,44 +281,76 @@ document.addEventListener('DOMContentLoaded', async () => {
                     img.alt = apiName;
                     img.style.maxWidth = '100%';
                     img.style.height = 'auto';
-                    img.style.borderRadius = '5px';
+                    img.style.borderRadius = '10px';
+                    img.style.boxShadow = 'var(--shadow)';
 
                     modalRefs.content.innerHTML = '';
                     modalRefs.content.appendChild(img);
                 } else {
+                    // Handle JSON response
                     const data = await response.json();
-                    modalRefs.content.textContent = JSON.stringify(data, null, 2);
+                    
+                    // Pretty-print JSON with syntax highlighting
+                    const formattedJson = syntaxHighlight(JSON.stringify(data, null, 2));
+                    modalRefs.content.innerHTML = formattedJson;
                 }
 
                 modalRefs.endpoint.textContent = apiUrl;
                 modalRefs.endpoint.classList.remove('d-none');
             } catch (error) {
                 modalRefs.content.textContent = `Error: ${error.message}`;
+                modalRefs.content.classList.add('error-message');
             } finally {
                 modalRefs.spinner.classList.add('d-none');
                 modalRefs.content.classList.remove('d-none');
             }
         }
+        
+        // JSON syntax highlighting
+        function syntaxHighlight(json) {
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
     } catch (error) {
         console.error('Error loading settings:', error);
     } finally {
+        // Add animation to loading screen disappearance
         setTimeout(() => {
-            loadingScreen.style.display = "none";
-            body.classList.remove("no-scroll");
-        }, 2000);
+            loadingScreen.style.opacity = 0;
+            loadingScreen.style.transition = 'opacity 0.5s ease';
+            
+            setTimeout(() => {
+                loadingScreen.style.display = "none";
+                body.classList.remove("no-scroll");
+            }, 500);
+        }, 1500);
     }
 });
 
+// Scroll event for navbar
 window.addEventListener('scroll', () => {
     const navbar = document.querySelector('.navbar');
     const navbarBrand = document.querySelector('.navbar-brand');
-    if (window.scrollY > 150) {
-        navbar.style.top = "0"
-        navbarBrand.classList.add('visible');
+    
+    if (window.scrollY > 100) {
         navbar.classList.add('scrolled');
+        navbarBrand.classList.add('visible');
     } else {
-        navbar.style.top = "-30vh"
-        navbarBrand.classList.remove('visible');
         navbar.classList.remove('scrolled');
+        navbarBrand.classList.remove('visible');
     }
 });

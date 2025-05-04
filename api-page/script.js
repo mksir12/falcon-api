@@ -128,19 +128,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             categoryElement.appendChild(categoryHeader);
             
             // Add category image (new feature)
-            if (category.image) {
-                const categoryImage = document.createElement('img');
-                categoryImage.src = category.image;
-                categoryImage.alt = category.name;
-                categoryImage.className = 'category-image';
-                categoryElement.appendChild(categoryImage);
-            } else {
-                const categoryImage = document.createElement('img');
-                categoryImage.src = '/api/placeholder/800/200';
-                categoryImage.alt = category.name;
-                categoryImage.className = 'category-image';
-                categoryElement.appendChild(categoryImage);
-            }
             
             const itemsRow = document.createElement('div');
             itemsRow.className = 'row';

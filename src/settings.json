@@ -1,6 +1,6 @@
 {
   "name": "Falcon-Api",
-  "version": "v3.0.0",
+  "version": "v1.0.5",
   "description": "Simple and easy to use API.",
   "header": {
     "status": "Online!",

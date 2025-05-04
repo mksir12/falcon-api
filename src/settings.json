@@ -61,7 +61,7 @@
           "name": "Tiktok V2",
           "desc": "Downloader tiktok v2",
           "path": "/download/tiktok-v2?url=",
-          "status": "update",
+          "status": "ready",
           "params": {
             "url": "URL video TikTok"
           }
@@ -115,7 +115,7 @@
           "name": "Ytdl V2",
           "desc": "Downloader youtube v2",
           "path": "/download/ytdl-v2?url=",
-          "status": "update",
+          "status": "ready",
           "params": {
             "url": "URL video YouTube"
           }
@@ -169,7 +169,7 @@
           "name": "XNXX",
           "desc": "Downloader xnxx",
           "path": "/download/xnxx?url=",
-          "status": "error",
+          "status": "ready",
           "params": {
             "url": "URL video XNXX"
           }
@@ -259,7 +259,7 @@
           "name": "Random Nsfw",
           "desc": "Random foto nsfw",
           "path": "/random/nsfw",
-          "status": "error"
+          "status": "ready"
         }, 
         {
           "name": "Pap Ayang",
@@ -304,7 +304,7 @@
           "name": "Emoji To Gif",
           "desc": "Convert emoji to gif",
           "path": "/tools/emojitogif?emoji=",
-          "status": "update",
+          "status": "ready",
           "params": {
             "emoji": "Emoji yang akan dikonversi menjadi GIF"
           }
@@ -401,7 +401,7 @@
           "name": "XNXX Search",
           "desc": "Search xnxx video",
           "path": "/search/xnxx?q=",
-          "status": "error",
+          "status": "ready",
           "params": {
             "q": "Kata kunci pencarian video XNXX"
           }

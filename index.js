@@ -8,9 +8,23 @@ require("./function.js")
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+let injectAnalytics;
+(async () => {
+  const analytics = await import('@vercel/analytics/server');
+  injectAnalytics = analytics.injectAnalytics;
+})();
+
+
 app.enable("trust proxy");
 app.set("json spaces", 2);
-
+app.use((req, res, next) => {
+    if (injectAnalytics) {
+      res.locals.injectAnalytics = () => injectAnalytics();
+    } else {
+      res.locals.injectAnalytics = () => '';
+    }
+    next();
+  });
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());

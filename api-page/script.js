@@ -86,8 +86,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         
         // Set page content from settings
-        setContent('page', 'textContent', settings.name || "Skyzopedia UI");
-        setContent('wm', 'textContent', `© ${new Date().getFullYear()} ${settings.apiSettings.creator}. All rights reserved.` || `© ${new Date().getFullYear()} Skyzopedia. All rights reserved.`);
+        setContent('page', 'textContent', settings.name || "Falcon-Api");
+        setContent('wm', 'textContent', `© ${new Date().getFullYear()} ${settings.apiSettings.creator}. All rights reserved.` || `© ${new Date().getFullYear()} FlowFalcon. All rights reserved.`);
         setContent('header', 'textContent', settings.name || "Skyzopedia UI");
         setContent('name', 'textContent', settings.name || "Skyzopedia UI");
         setContent('version', 'textContent', settings.version || "v1.0");

@@ -1,24 +1,22 @@
 {
-  "name": "Skyzopedia Api",
+  "name": "Falcon-Api",
   "version": "v3.0.0",
-  "description": "Simple and easy to use API for WhatsApp Bot feature.",
+  "description": "Simple and easy to use API.",
   "header": {
-    "status": "Active!"
+    "status": "Online!",
+    "imageSrc": [
+      "https://media4.giphy.com/media/l0Iy33dWjmywkCnNS/giphy.gif?cid=6c09b952p3mt40j1mgznfi9rwwtccbjl7mtc2kvfugymeinr&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=g"
+    ],
+    "imageSize": {
+      "mobile": "80%",
+      "tablet": "40%",
+      "desktop": "40%"
+    }
   },
   "apiSettings": {
-    "creator": "Skyzopedia", 
-    "apikey": ["new2025"]
+    "creator": "FlowFalcon", 
+    "apikey": ["falcon-api"]
   },
-  "links": [
-    {
-      "name": "Source Code",
-      "url": "https://github.com/rynxzyy/Rynn-UI"
-    },
-    {
-      "name": "Contact Me",
-      "url": "https://whatsapp.com/channel/0029VaYoztA47XeAhs447Y1s"
-    }
-  ],
   "categories": [
     {
       "name": "OpenAI",
@@ -35,23 +33,6 @@
         }        
       ]
     },
-    {
-      "name": "Orderkuota Gateway",
-      "items": [
-        {
-          "name": "Create Payment",
-          "desc": "Create qris payment", 
-          "path": "/orderkuota/createpayment?apikey=&amount=&codeqr=", 
-          "innerDesc": "Buy apikey >> wa.me/628386890336"
-        },
-        {
-          "name": "Cek Status",
-          "desc": "Cek status payment", 
-          "path": "/orderkuota/cekstatus?apikey=&merchant=&keyorkut=", 
-          "innerDesc": "Buy apikey >> wa.me/628386890336"          
-        }
-      ]
-    },    
     {
       "name": "Downloader",
       "items": [

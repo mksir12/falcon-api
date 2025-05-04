@@ -1,11 +1,11 @@
 {
   "name": "Falcon-Api",
-  "version": "v1.1.0",
+  "version": "v3.0.0",
   "description": "Simple and easy to use API.",
   "header": {
     "status": "Online!",
-    "imageSrc": [
-      "https://media4.giphy.com/media/l0Iy33dWjmywkCnNS/giphy.gif?cid=6c09b952p3mt40j1mgznfi9rwwtccbjl7mtc2kvfugymeinr&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=g"
+    "bannerImage": [
+      "/banner.jpg"
     ],
     "imageSize": {
       "mobile": "80%",

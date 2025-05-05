@@ -337,6 +337,15 @@
             "emoji1": "Emoji pertama untuk digabungkan",
             "emoji2": "Emoji kedua untuk digabungkan"
           }
+        },
+        {
+          "name": "Host Info",
+          "desc": "Get information host",
+          "path": "/tools/hostinfo?host=",
+          "status": "ready",
+          "params": {
+            "host": "masukan link atau ip"
+          }
         }                      
       ]
     },    
@@ -442,6 +451,12 @@
           "params": {
             "q": "Kata kunci pencarian file di Sfile"
           }
+        },              
+        {
+          "name": "berita anime",
+          "desc": "mendapatkan berita anime",
+          "path": "/search/anime-news",
+          "status": "ready"
         }                                   
       ]
     }, 

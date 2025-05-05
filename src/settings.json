@@ -75,7 +75,16 @@
           "params": {
             "url": "URL video TikTok"
           }
-        },       
+        },      
+        {
+          "name": "Douyin",
+          "desc": "Downloader douyi ",
+          "path": "/download/douyin?url=",
+          "status": "ready",
+          "params": {
+            "url": "URL douyin"
+          }
+        },         
         {
           "name": "Twitter",
           "desc": "Downloader twitter",

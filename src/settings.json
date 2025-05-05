@@ -19,7 +19,7 @@
           "name": "Chatbot",
           "desc": "model available: chatgpt4, metaai. deepseek",
           "path": "/ai/chatbot?prompt=&model=",
-          "status": "error",
+          "status": "ready",
           "params": {
             "prompt": "Teks atau perintah untuk chat AI",
             "model": "pilih model yang tersedia"

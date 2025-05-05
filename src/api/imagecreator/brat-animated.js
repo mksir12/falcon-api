@@ -1,5 +1,5 @@
 module.exports = function app (app) {
-  app.get('/imagecreator/brat/animate', async (req, res) => {
+  app.get('/imagecreator/brat-animated', async (req, res) => {
     try {
       const { text } = req.query;
       const gifBuffer = await getBuffer(`https://brat.caliphdev.com/api/brat/animate?text=${encodeURIComponent(text)}`);

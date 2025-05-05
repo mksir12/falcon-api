@@ -16,12 +16,13 @@
       "image": "/api/placeholder/800/200",
       "items": [
         {
-          "name": "OpenAI",
-          "desc": "Openai chat",
-          "path": "/ai/openai?text=",
+          "name": "Chatbot",
+          "desc": "model available: chatgpt4, metaai. deepseek",
+          "path": "/ai/chatbot?prompt=&model=",
           "status": "error",
           "params": {
-            "text": "Teks atau perintah untuk chat AI"
+            "prompt": "Teks atau perintah untuk chat AI",
+            "model": "pilih model yang tersedia"
           }
         }, 
         {

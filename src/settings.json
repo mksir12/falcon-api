@@ -544,7 +544,16 @@
           "params": {
             "text": "Teks yang akan dikonversi menjadi gaya Brat"
           }
-        }                                 
+        },
+        {
+          "name": "Brat Animated",
+          "desc": "Brat text generator with animation",
+          "path": "/imagecreator/brat-animated?text=",
+          "status": "ready",
+          "params": {
+            "text": "Teks yang akan dikonversi menjadi gaya Brat"
+          }
+        }
       ]
     }, 
     {

@@ -366,7 +366,7 @@
         {
           "name": "Pinterest",
           "desc": "Search foto pinterest",
-          "path": "/search/youtube?q=",
+          "path": "/search/pinterest?q=",
           "status": "ready",
           "params": {
             "q": "Kata kunci pencarian Pinterest"
@@ -478,7 +478,7 @@
           "name": "Instagram Stalk",
           "desc": "Stalk Instagram account",
           "path": "/stalk/instagram?user=",
-          "status": "ready",
+          "status": "error",
           "params": {
             "user": "Username Instagram"
           }
@@ -496,7 +496,7 @@
           "name": "Tiktok Stalk",
           "desc": "Stalk tiktok account",
           "path": "/stalk/tiktok?user=",
-          "status": "ready",
+          "status": "error",
           "params": {
             "user": "Username TikTok"
           }
@@ -505,7 +505,7 @@
           "name": "Youtube Stalk",
           "desc": "Stalk youtube account",
           "path": "/stalk/youtube?user=",
-          "status": "ready",
+          "status": "error",
           "params": {
             "user": "Username YouTube"
           }

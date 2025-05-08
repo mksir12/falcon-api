@@ -1,5 +1,5 @@
 {
-  "name": "skyzopedia-api",
+  "name": "falcon-api",
   "version": "1.0.0",
   "description": "A simple and customizable API documentation interface built with Express.js.",
   "main": "index.js",
@@ -37,6 +37,7 @@
     "path": "^0.12.7",
     "qrcode": "^1.5.4", 
     "qs": "^6.14.0",
-    "@vercel/analytics": "latest"
+    "@vercel/analytics": "latest",
+    "canvas":"latest"
   }
 }

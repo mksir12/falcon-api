@@ -324,7 +324,7 @@
           "name": "Emoji To Gif",
           "desc": "Convert emoji to gif",
           "path": "/tools/emojitogif?emoji=",
-          "status": "ready",
+          "status": "error",
           "params": {
             "emoji": "Emoji yang akan dikonversi menjadi GIF"
           }
@@ -367,7 +367,7 @@
           "name": "Pinterest",
           "desc": "Search foto pinterest",
           "path": "/search/pinterest?q=",
-          "status": "ready",
+          "status": "error",
           "params": {
             "q": "Kata kunci pencarian Pinterest"
           }

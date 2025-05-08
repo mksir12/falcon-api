@@ -569,6 +569,16 @@
           "params": {
             "text": "Teks yang akan dikonversi menjadi gaya Brat"
           }
+        },
+        {
+          "name": "Fake ngl",
+          "desc": "Fake ngl chat for fun",
+          "path": "/imagecreator/ngl?title=&text=",
+          "status": "ready",
+          "params": {
+            "title":"Title untuk judul di ngl",
+            "text": "isi pesan dari ngl"
+          }
         }
       ]
     }, 

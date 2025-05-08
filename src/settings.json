@@ -2,7 +2,7 @@
   "name": "Falcon-Api",
   "version": "v1.2",
   "description": "Simple and easy to use API.",
-  "bannerImage": "/src/nahida.mp4",
+  "bannerImage": "/src/banner.jpg",
   "header": {
     "status": "Online!"
   },

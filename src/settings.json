@@ -213,6 +213,16 @@
           }
         }, 
         {
+          "name": "Savetube",
+          "desc": "Downloader savetube",
+          "path": "/download/savetube?url=&format=",
+          "status": "ready",
+          "params": {
+            "url": "URL YouTube",
+            "format":"Format"
+          }
+        }, 
+        {
           "name": "Capcut",
           "desc": "Downloader capcut",
           "path": "/download/capcut?url=",

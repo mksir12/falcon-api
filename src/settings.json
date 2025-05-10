@@ -1,6 +1,6 @@
 {
   "name": "Falcon-Api",
-  "version": "v1.2",
+  "version": "v1.3",
   "description": "Simple and easy to use API.",
   "bannerImage": "/src/banner.jpg",
   "header": {
@@ -13,7 +13,6 @@
   "categories": [
     {
       "name": "OpenAI",
-      "image": "/api/placeholder/800/200",
       "items": [
         {
           "name": "Chatbot",
@@ -48,7 +47,6 @@
     },
     {
       "name": "Downloader",
-      "image": "/api/placeholder/800/200",
       "items": [
         {
           "name": "Aio",
@@ -271,7 +269,6 @@
     },
     {
       "name": "Random",
-      "image": "/api/placeholder/800/200",
       "items": [
         {
           "name": "Blue Archive",
@@ -301,7 +298,6 @@
     },
     {
       "name": "Tools",
-      "image": "/api/placeholder/800/200",
       "items": [
         {
           "name": "Text-to-speech",
@@ -316,7 +312,7 @@
           "name": "OCR",
           "desc": "Read text from image",
           "path": "/tools/ocr?url=",
-          "status": "error",
+          "status": "ready",
           "params": {
             "url": "URL gambar yang berisi teks"
           }
@@ -362,7 +358,6 @@
     },    
     {
       "name": "Search",
-      "image": "/api/placeholder/800/200",
       "items": [
         {
           "name": "Youtube Search",
@@ -473,7 +468,6 @@
     }, 
     {
       "name": "Stalker",
-      "image": "/api/placeholder/800/200",
       "items": [
         {
           "name": "Npm Stalk",
@@ -524,7 +518,6 @@
     },
     {
       "name": "Image Creator",
-      "image": "/api/placeholder/800/200",
       "items": [
         {
           "name": "Remini",
@@ -594,7 +587,6 @@
     }, 
     {
       "name": "API",
-      "image": "/api/placeholder/800/200",
       "items": [
         {
           "name": "Status Api",

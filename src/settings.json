@@ -456,7 +456,7 @@
           "name": "Welcome",
           "desc": "Welcome banner generator",
           "path": "/imagecreator/welcome?bg=&ppuser=&text=",
-          "status": "update",
+          "status": "ready",
           "params": {
             "bg":"background untuk banner",
             "ppuser":"gambar profil pengguna",
@@ -467,7 +467,7 @@
           "name": "Goodbye",
           "desc": "Goodbye banner generator",
           "path": "/imagecreator/goodbye?bg=&ppuser=&text=",
-          "status": "update",
+          "status": "ready",
           "params": {
             "bg":"background untuk banner",
             "ppuser":"gambar profil pengguna",
@@ -478,7 +478,7 @@
           "name": "Demote",
           "desc": "Demote banner generator",
           "path": "/imagecreator/demote?bg=&ppuser=&text=",
-          "status": "update",
+          "status": "ready",
           "params": {
             "bg":"background untuk banner",
             "ppuser":"gambar profil pengguna",
@@ -489,7 +489,7 @@
           "name": "Promote",
           "desc": "Promote banner generator",
           "path": "/imagecreator/Promote?bg=&ppuser=&text=",
-          "status": "update",
+          "status": "ready",
           "params": {
             "bg":"background untuk banner",
             "ppuser":"gambar profil pengguna",

@@ -79,19 +79,6 @@ module.exports = function (app) {
 app.get('/download/tiktok', async (req, res) => {
        const { url } = req.query
         try {
-            const results = await tiktokdl.fetchData(url);
-            res.status(200).json({
-                status: true,
-                result: results
-            });
-        } catch (error) {
-            res.status(500).send(`Error: ${error.message}`);
-        }
-});
-
-app.get('/download/tiktok-v2', async (req, res) => {
-       const { url } = req.query
-        try {
             const results = await tiktok(url);
             res.status(200).json({
                 status: true,

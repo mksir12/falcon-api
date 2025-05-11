@@ -68,7 +68,7 @@ async function ytmp4(url) {
         const id = url.match(/(?:youtu\.be\/|youtube\.com\/(?:.*v=|.*\/|.*embed\/))([^&?/]+)/)?.[1];
         if (!id) throw new Error("Gagal mengambil ID video.");
 
-        let format = 'mp3';
+        let format = 'mp4';
         let convertURL = `${init.convertURL}&v=${id}&f=${format}&_=${Math.random()}`;
 
         const converts = await fetch(convertURL, { headers });

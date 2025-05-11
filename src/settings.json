@@ -1,6 +1,6 @@
 {
   "name": "Falcon-Api",
-  "version": "v1.3",
+  "version": "v1.5",
   "description": "Simple and easy to use API.",
   "bannerImage": "/src/banner.jpg",
   "header": {
@@ -65,15 +65,6 @@
           "params": {
             "url": "URL video TikTok"
           }
-        }, 
-        {
-          "name": "Tiktok V2",
-          "desc": "Downloader tiktok v2",
-          "path": "/download/tiktok-v2?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL video TikTok"
-          }
         },      
         {
           "name": "Douyin",
@@ -103,15 +94,6 @@
           }
         }, 
         {
-          "name": "Ytdl",
-          "desc": "Downloader youtube",
-          "path": "/download/ytdl?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL video YouTube"
-          }
-        }, 
-        {
           "name": "Ytmp3",
           "desc": "Downloader youtube mp3",
           "path": "/download/ytmp3?url=",
@@ -129,15 +111,6 @@
             "url": "URL video YouTube untuk diunduh sebagai MP4"
           }
         },        
-        {
-          "name": "Ytdl V2",
-          "desc": "Downloader youtube v2",
-          "path": "/download/ytdl-v2?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL video YouTube"
-          }
-        },
         {
           "name": "Instagram",
           "desc": "Downloader instagram",
@@ -193,34 +166,6 @@
           }
         }, 
         {
-          "name": "9xbuddy",
-          "desc": "All in downloader",
-          "path": "/download/9xbuddy?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL media yang akan diunduh"
-          }
-        }, 
-        {
-          "name": "Spotify",
-          "desc": "Downloader spotify",
-          "path": "/download/spotify?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL lagu Spotify"
-          }
-        }, 
-        {
-          "name": "Savetube",
-          "desc": "Downloader savetube",
-          "path": "/download/savetube?url=&format=",
-          "status": "ready",
-          "params": {
-            "url": "URL YouTube",
-            "format":"Format"
-          }
-        }, 
-        {
           "name": "Capcut",
           "desc": "Downloader capcut",
           "path": "/download/capcut?url=",
@@ -229,15 +174,6 @@
             "url": "URL template Capcut"
           }
         },         
-        {
-          "name": "Play Spotify",
-          "desc": "Play spotify music",
-          "path": "/download/playspotify?q=",
-          "status": "ready",
-          "params": {
-            "q": "Kata kunci atau judul lagu Spotify"
-          }
-        }, 
         {
           "name": "Gdrive",
           "desc": "Downloader google drive",
@@ -327,15 +263,6 @@
           }
         }, 
         {
-          "name": "Emoji To Gif",
-          "desc": "Convert emoji to gif",
-          "path": "/tools/emojitogif?emoji=",
-          "status": "error",
-          "params": {
-            "emoji": "Emoji yang akan dikonversi menjadi GIF"
-          }
-        }, 
-        {
           "name": "Emoji Mix",
           "desc": "Emoji mix converter",
           "path": "/tools/emojimix?emoji1=&emoji2=",
@@ -366,15 +293,6 @@
           "status": "ready",
           "params": {
             "q": "Kata kunci pencarian YouTube"
-          }
-        }, 
-        {
-          "name": "Pinterest",
-          "desc": "Search foto pinterest",
-          "path": "/search/pinterest?q=",
-          "status": "error",
-          "params": {
-            "q": "Kata kunci pencarian Pinterest"
           }
         }, 
         {
@@ -466,56 +384,7 @@
         }                                   
       ]
     }, 
-    {
-      "name": "Stalker",
-      "items": [
-        {
-          "name": "Npm Stalk",
-          "desc": "Stalk npm package",
-          "path": "/stalk/npm?q=",
-          "status": "ready",
-          "params": {
-            "q": "Nama package NPM"
-          }
-        },          
-        {
-          "name": "Instagram Stalk",
-          "desc": "Stalk Instagram account",
-          "path": "/stalk/instagram?user=",
-          "status": "error",
-          "params": {
-            "user": "Username Instagram"
-          }
-        }, 
-        {
-          "name": "Github Stalk",
-          "desc": "Stalk github account",
-          "path": "/stalk/github?user=",
-          "status": "ready",
-          "params": {
-            "user": "Username GitHub"
-          }
-        },        
-        {
-          "name": "Tiktok Stalk",
-          "desc": "Stalk tiktok account",
-          "path": "/stalk/tiktok?user=",
-          "status": "error",
-          "params": {
-            "user": "Username TikTok"
-          }
-        }, 
-        {
-          "name": "Youtube Stalk",
-          "desc": "Stalk youtube account",
-          "path": "/stalk/youtube?user=",
-          "status": "error",
-          "params": {
-            "user": "Username YouTube"
-          }
-        }            
-      ]
-    },
+
     {
       "name": "Image Creator",
       "items": [
@@ -582,7 +451,51 @@
             "title":"Title untuk judul di ngl",
             "text": "isi pesan dari ngl"
           }
-        }
+        },
+        {
+          "name": "Welcome",
+          "desc": "Welcome banner generator",
+          "path": "/imagecreator/welcome?bg=&ppuser=&text=",
+          "status": "ready",
+          "params": {
+            "bg":"background untuk banner",
+            "ppuser":"gambar profil pengguna",
+            "text": "isi pesan untuk banner"
+          }
+        },
+        {
+          "name": "Goodbye",
+          "desc": "Goodbye banner generator",
+          "path": "/imagecreator/goodbye?bg=&ppuser=&text=",
+          "status": "ready",
+          "params": {
+            "bg":"background untuk banner",
+            "ppuser":"gambar profil pengguna",
+            "text": "isi pesan untuk banner"
+          }
+        },
+        {
+          "name": "Demote",
+          "desc": "Demote banner generator",
+          "path": "/imagecreator/demote?bg=&ppuser=&text=",
+          "status": "ready",
+          "params": {
+            "bg":"background untuk banner",
+            "ppuser":"gambar profil pengguna",
+            "text": "isi pesan untuk banner"
+          }
+        },
+        {
+          "name": "Promote",
+          "desc": "Promote banner generator",
+          "path": "/imagecreator/Promote?bg=&ppuser=&text=",
+          "status": "ready",
+          "params": {
+            "bg":"background untuk banner",
+            "ppuser":"gambar profil pengguna",
+            "text": "isi pesan untuk banner"
+          }
+        },
       ]
     }, 
     {

@@ -22,7 +22,7 @@ module.exports = function (app) {
       });
     }
 
-    if (containsEmoji(title) || containsEmoji(text)) {
+    if (containsEmoji(text)) {
       return res.status(400).json({
         status: false,
         message: "Maaf, emoji belum didukung"

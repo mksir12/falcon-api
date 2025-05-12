@@ -571,7 +571,7 @@
         {
           "name": "iPhone Quoted Chat",
           "desc": "Buat Kata-kata ala chat iPhone",
-          "path": "/imagecreator/iqc&text=",
+          "path": "/imagecreator/iqc?text=",
           "status": "ready",
           "params": {
             "text": "isi kata-kata mu maksimal 80 karakter"

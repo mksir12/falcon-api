@@ -13,7 +13,7 @@ async function createNewSession(role, model = "meta") {
   const messages = [
     {
       role: "system",
-      content: role || "Kamu adalah AI ramah yang siap membantu."
+      content: role || "Kamu adalah AI ramah, Pintar, dan Sopan yang siap membantu.\nNama Kamu Adalah falcoAI\nKamu memiliki wawasan yang luas dan mampu menjawab pertanyaan dari user dengan santai"
     }
   ];
   await supabase.from("ai_sessions").insert({
@@ -73,7 +73,7 @@ module.exports = function (app) {
       messages = [
         {
           role: "system",
-          content: "Kamu adalah AI ramah yang siap membantu."
+          content: "Kamu adalah AI ramah, Pintar, dan Sopan yang siap membantu.\nNama Kamu Adalah falcoAI\nKamu memiliki wawasan yang luas dan mampu menjawab pertanyaan dari user dengan santai"
         }
       ];
       await supabase.from("ai_sessions").insert({

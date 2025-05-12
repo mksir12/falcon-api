@@ -20,7 +20,7 @@ async function animeNews() {
 }
 
 module.exports = function (app) {
-  app.get("/search/anime-news", async (req, res) => {
+  app.get("/anime/beritaanime", async (req, res) => {
     const result = await animeNews();
     if (Array.isArray(result)) {
       res.json({

@@ -1,7 +1,7 @@
 {
   "name": "Falcon-Api",
-  "version": "v1.5",
-  "description": "Simple and easy to use API.",
+  "version": "v1.6",
+  "description": "simple and powerful tools API and easy to use",
   "bannerImage": "/src/banner.jpg",
   "header": {
     "status": "Online!"
@@ -45,6 +45,47 @@
         }
       ]
     },
+    {
+      "name": "Anime",
+      "items": [
+        {
+          "name": "beritaanime",
+          "desc": "mendapatkan berita anime terbaru",
+          "path": "/anime/beritaanime",
+          "status": "ready"
+        },
+        {
+          "name": "update anime",
+          "desc": "mendapatkan update anime terbaru",
+          "path": "/anime/latest",
+          "status": "ready"
+        },
+        {
+          "name": "hot anime",
+          "desc": "mendapatkan list anime hot",
+          "path": "/anime/hot",
+          "status": "ready"
+        },
+        {
+          "name": "Search Anime",
+          "desc": "Mendapatkan info anime",
+          "path": "/anime/search?q=",
+          "status": "ready",
+          "params": {
+            "q": "isi nama yang ingin di cari"
+          }
+        },
+         {
+          "name": "Detail Anime",
+          "desc": "Mendapatkan info anime Secara detail",
+          "path": "/anime/detail?url=",
+          "status": "ready",
+          "params": {
+            "url": "isi link dari https://animedao.lv"
+          }
+        },                                      
+      ]
+    },        
     {
       "name": "Downloader",
       "items": [
@@ -375,13 +416,7 @@
           "params": {
             "q": "Kata kunci pencarian file di Sfile"
           }
-        },              
-        {
-          "name": "berita anime",
-          "desc": "mendapatkan berita anime",
-          "path": "/search/anime-news",
-          "status": "ready"
-        }                                   
+        }                                         
       ]
     }, 
 

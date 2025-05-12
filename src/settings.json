@@ -34,6 +34,43 @@
           }
         },
         {
+          "name": "Role AI Create",
+          "desc": "Membuat Role dan session AI",
+          "path": "/ai/createchat?role=",
+          "status": "ready",
+          "params": {
+            "role": "isi logic ai yang kamu mau"
+          }
+        },
+        {
+          "name": "Role AI Reset",
+          "desc": "Menghapus Chat Dengan AI",
+          "path": "/ai/resetchat?session=",
+          "status": "ready",
+          "params": {
+            "session": "isi session chat ai kamu"
+          }
+        },
+        {
+          "name": "Role AI Delete",
+          "desc": "Menghapus Sessions dan Role AI",
+          "path": "/ai/resetchat?session=",
+          "status": "ready",
+          "params": {
+            "session": "isi session chat ai kamu"
+          }
+        },
+        {
+          "name": "Role AI Chat",
+          "desc": "Menghapus Sessions dan Role AI",
+          "path": "/ai/resetchat?chat=session=",
+          "status": "ready",
+          "params": {
+            "chat":"masukan pesan ke ai",
+            "session": "isi session chat ai kamu"
+          }
+        },
+        {
           "name": "HydroMind",
           "desc": "See the list of supported AI models here: https://mind.hydrooo.web.id",
           "path": "/ai/hydromind?text=&model=",
@@ -532,7 +569,16 @@
           }
         },
         {
-          "name": "Fake Tiktok (Beta)",
+          "name": "iPhone Quoted Chat",
+          "desc": "Buat Kata-kata ala chat iPhone",
+          "path": "/imagecreator/iqc&text=",
+          "status": "ready",
+          "params": {
+            "text": "isi kata-kata mu maksimal 80 karakter"
+          }
+        },
+        {
+          "name": "Fake Tiktok",
           "desc": "Fake Profil Tiktok, parameter lengkap cek di channel",
           "path": "/imagecreator/faketiktok?name=&username=&pp=",
           "status": "ready",
@@ -556,4 +602,4 @@
       ]
     }               
   ]
-}
+        }

@@ -64,7 +64,7 @@
                 },
                 {
                     "name": "Role AI Chat",
-                    "desc": "Menghapus Sessions dan Role AI",
+                    "desc": "Ngobrol dengan ai yang di simpan dengan Sessions dan Role AI",
                     "path": "/ai/chat?q=session=",
                     "status": "ready",
                     "params": {

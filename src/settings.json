@@ -1,605 +1,606 @@
 {
-  "name": "Falcon-Api",
-  "version": "v1.6",
-  "description": "simple and powerful tools API and easy to use",
-  "bannerImage": "/src/banner.jpg",
-  "header": {
-    "status": "Online!"
-  },
-  "apiSettings": {
-    "creator": "FlowFalcon", 
-    "apikey": ["falcon-api"]
-  },
-  "categories": [
-    {
-      "name": "OpenAI",
-      "items": [
-        {
-          "name": "Chatbot",
-          "desc": "model available: chatgpt4, metaai. deepseek",
-          "path": "/ai/chatbot?prompt=&model=",
-          "status": "ready",
-          "params": {
-            "prompt": "Teks atau perintah untuk chat AI",
-            "model": "pilih model yang tersedia"
-          }
-        }, 
-        {
-          "name": "Deepseek",
-          "desc": "Deepseek ai",
-          "path": "/ai/deepseek?text=",
-          "status": "ready",
-          "params": {
-            "text": "Teks atau perintah untuk chat AI Deepseek"
-          }
-        },
-        {
-          "name": "Role AI Create",
-          "desc": "Membuat Role dan session AI",
-          "path": "/ai/createchat?role=",
-          "status": "ready",
-          "params": {
-            "role": "isi logic ai yang kamu mau"
-          }
-        },
-        {
-          "name": "Role AI Reset",
-          "desc": "Menghapus Chat Dengan AI",
-          "path": "/ai/resetchat?session=",
-          "status": "ready",
-          "params": {
-            "session": "isi session chat ai kamu"
-          }
-        },
-        {
-          "name": "Role AI Delete",
-          "desc": "Menghapus Sessions dan Role AI",
-          "path": "/ai/resetchat?session=",
-          "status": "ready",
-          "params": {
-            "session": "isi session chat ai kamu"
-          }
-        },
-        {
-          "name": "Role AI Chat",
-          "desc": "Menghapus Sessions dan Role AI",
-          "path": "/ai/resetchat?chat=session=",
-          "status": "ready",
-          "params": {
-            "chat":"masukan pesan ke ai",
-            "session": "isi session chat ai kamu"
-          }
-        },
-        {
-          "name": "HydroMind",
-          "desc": "See the list of supported AI models here: https://mind.hydrooo.web.id",
-          "path": "/ai/hydromind?text=&model=",
-          "status": "ready",
-          "params": {
-            "text": "Teks atau perintah untuk chat AI",
-            "model":"1See the list of supported AI models here: https://mind.hydrooo.web.id"
-          }
-        }
-      ]
+    "name": "Falcon-Api",
+    "version": "v1.6",
+    "description": "simple and powerful tools API and easy to use",
+    "bannerImage": "/src/banner.jpg",
+    "header": {
+        "status": "Online!"
     },
-    {
-      "name": "Anime",
-      "items": [
-        {
-          "name": "beritaanime",
-          "desc": "mendapatkan berita anime terbaru",
-          "path": "/anime/beritaanime",
-          "status": "ready"
-        },
-        {
-          "name": "update anime",
-          "desc": "mendapatkan update anime terbaru",
-          "path": "/anime/latest",
-          "status": "ready"
-        },
-        {
-          "name": "hot anime",
-          "desc": "mendapatkan list anime hot",
-          "path": "/anime/hot",
-          "status": "ready"
-        },
-        {
-          "name": "Search Anime",
-          "desc": "Mendapatkan info anime",
-          "path": "/anime/search?q=",
-          "status": "ready",
-          "params": {
-            "q": "isi nama yang ingin di cari"
-          }
-        },
-         {
-          "name": "Detail Anime",
-          "desc": "Mendapatkan info anime Secara detail",
-          "path": "/anime/detail?url=",
-          "status": "ready",
-          "params": {
-            "url": "isi link dari https://animedao.lv"
-          }
-        }                                      
-      ]
-    },        
-    {
-      "name": "Downloader",
-      "items": [
-        {
-          "name": "Aio",
-          "desc": "All in downloader",
-          "path": "/download/aio?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL media yang akan diunduh"
-          }
-        },       
-        {
-          "name": "Tiktok",
-          "desc": "Downloader tiktok",
-          "path": "/download/tiktok?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL video TikTok"
-          }
-        },      
-        {
-          "name": "Douyin",
-          "desc": "Downloader douyi ",
-          "path": "/download/douyin?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL douyin"
-          }
-        },         
-        {
-          "name": "Twitter",
-          "desc": "Downloader twitter",
-          "path": "/download/twitter?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL tweet atau video Twitter"
-          }
-        },         
-        {
-          "name": "Facebook",
-          "desc": "Downloader facebook",
-          "path": "/download/facebook?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL video atau post Facebook"
-          }
-        }, 
-        {
-          "name": "Ytmp3",
-          "desc": "Downloader youtube mp3",
-          "path": "/download/ytmp3?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL video YouTube untuk dikonversi ke MP3"
-          }
-        },        
-        {
-          "name": "Ytmp4",
-          "desc": "Downloader youtube mp4",
-          "path": "/download/ytmp4?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL video YouTube untuk diunduh sebagai MP4"
-          }
-        },        
-        {
-          "name": "Instagram",
-          "desc": "Downloader instagram",
-          "path": "/download/instagram?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL post atau story Instagram"
-          }
-        }, 
-        {
-          "name": "Pinterest",
-          "desc": "Downloader pinterest",
-          "path": "/download/pinterest?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL pin Pinterest"
-          }
-        }, 
-        {
-          "name": "Snackvideo",
-          "desc": "Downloader snackvideo",
-          "path": "/download/snackvideo?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL video Snackvideo"
-          }
-        }, 
-        {
-          "name": "Soundcloud",
-          "desc": "Downloader soundcloud",
-          "path": "/download/soundcloud?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL track Soundcloud"
-          }
-        }, 
-        {
-          "name": "Terabox",
-          "desc": "Downloader terabox",
-          "path": "/download/terabox?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL file Terabox"
-          }
-        }, 
-        {
-          "name": "XNXX",
-          "desc": "Downloader xnxx",
-          "path": "/download/xnxx?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL video XNXX"
-          }
-        }, 
-        {
-          "name": "Capcut",
-          "desc": "Downloader capcut",
-          "path": "/download/capcut?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL template Capcut"
-          }
-        },         
-        {
-          "name": "Gdrive",
-          "desc": "Downloader google drive",
-          "path": "/download/gdrive?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL file Google Drive"
-          }
-        }, 
-        {
-          "name": "Videy",
-          "desc": "Downloader videy",
-          "path": "/download/videy?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL video Videy"
-          }
-        }, 
-        {
-          "name": "Doodstream",
-          "desc": "Downloader doodstream",
-          "path": "/download/doodstream?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL video Doodstream"
-          }
-        }        
-      ]
+    "apiSettings": {
+        "creator": "FlowFalcon",
+        "apikey": [
+            "falcon-api"
+        ]
     },
-    {
-      "name": "Random",
-      "items": [
+    "categories": [
         {
-          "name": "Blue Archive",
-          "desc": "Random foto blue archive",
-          "path": "/random/ba",
-          "status": "ready"
-        }, 
-        {
-          "name": "Random Waifu",
-          "desc": "Random foto waifu",
-          "path": "/random/waifu",
-          "status": "ready"
-        }, 
-        {
-          "name": "Random Nsfw",
-          "desc": "Random foto nsfw",
-          "path": "/random/nsfw",
-          "status": "ready"
-        }, 
-        {
-          "name": "Pap Ayang",
-          "desc": "Random pap ayang",
-          "path": "/random/papayang",
-          "status": "ready"
-        }                       
-      ]
-    },
-    {
-      "name": "Tools",
-      "items": [
-        {
-          "name": "Text-to-speech",
-          "desc": "Tts anime character",
-          "path": "/tools/text-to-speech?text=",
-          "status": "ready",
-          "params": {
-            "text": "Teks yang akan dikonversi menjadi suara"
-          }
-        }, 
-        {
-          "name": "OCR",
-          "desc": "Read text from image",
-          "path": "/tools/ocr?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL gambar yang berisi teks"
-          }
-        },        
-        {
-          "name": "Screenshot Web",
-          "desc": "Screenshot web url",
-          "path": "/tools/ssweb?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL website yang akan diambil screenshot"
-          }
-        }, 
-        {
-          "name": "Emoji Mix",
-          "desc": "Emoji mix converter",
-          "path": "/tools/emojimix?emoji1=&emoji2=",
-          "status": "ready",
-          "params": {
-            "emoji1": "Emoji pertama untuk digabungkan",
-            "emoji2": "Emoji kedua untuk digabungkan"
-          }
+            "name": "OpenAI",
+            "items": [
+                {
+                    "name": "Chatbot",
+                    "desc": "model available: chatgpt4, metaai. deepseek",
+                    "path": "/ai/chatbot?prompt=&model=",
+                    "status": "ready",
+                    "params": {
+                        "prompt": "Teks atau perintah untuk chat AI",
+                        "model": "pilih model yang tersedia"
+                    }
+                },
+                {
+                    "name": "Deepseek",
+                    "desc": "Deepseek ai",
+                    "path": "/ai/deepseek?text=",
+                    "status": "ready",
+                    "params": {
+                        "text": "Teks atau perintah untuk chat AI Deepseek"
+                    }
+                },
+                {
+                    "name": "Role AI Create",
+                    "desc": "Membuat Role dan session AI",
+                    "path": "/ai/createchat?role=",
+                    "status": "ready",
+                    "params": {
+                        "role": "isi logic ai yang kamu mau"
+                    }
+                },
+                {
+                    "name": "Role AI Reset",
+                    "desc": "Menghapus Chat Dengan AI",
+                    "path": "/ai/clearchat?session=",
+                    "status": "ready",
+                    "params": {
+                        "session": "isi session chat ai kamu"
+                    }
+                },
+                {
+                    "name": "Role AI Delete",
+                    "desc": "Menghapus Sessions dan Role AI",
+                    "path": "/ai/deletesession?session=",
+                    "status": "ready",
+                    "params": {
+                        "session": "isi session chat ai kamu"
+                    }
+                },
+                {
+                    "name": "Role AI Chat",
+                    "desc": "Menghapus Sessions dan Role AI",
+                    "path": "/ai/chat?q=session=",
+                    "status": "ready",
+                    "params": {
+                        "q": "masukan pesan ke ai",
+                        "session": "isi session chat ai kamu"
+                    }
+                },
+                {
+                    "name": "HydroMind",
+                    "desc": "See the list of supported AI models here: https://mind.hydrooo.web.id",
+                    "path": "/ai/hydromind?text=&model=",
+                    "status": "ready",
+                    "params": {
+                        "text": "Teks atau perintah untuk chat AI",
+                        "model": "1See the list of supported AI models here: https://mind.hydrooo.web.id"
+                    }
+                }
+            ]
         },
         {
-          "name": "Host Info",
-          "desc": "Get information host",
-          "path": "/tools/hostinfo?host=",
-          "status": "ready",
-          "params": {
-            "host": "masukan link atau ip"
-          }
-        }                      
-      ]
-    },    
-    {
-      "name": "Search",
-      "items": [
-        {
-          "name": "Youtube Search",
-          "desc": "Search youtube",
-          "path": "/search/youtube?q=",
-          "status": "ready",
-          "params": {
-            "q": "Kata kunci pencarian YouTube"
-          }
-        }, 
-        {
-          "name": "Google Image",
-          "desc": "Search foto google",
-          "path": "/search/gimage?q=",
-          "status": "ready",
-          "params": {
-            "q": "Kata kunci pencarian gambar Google"
-          }
-        }, 
-        {
-          "name": "Playstore",
-          "desc": "Search apk playstore",
-          "path": "/search/playstore?q=",
-          "status": "ready",
-          "params": {
-            "q": "Kata kunci pencarian aplikasi di Playstore"
-          }
-        }, 
-        {
-          "name": "Npm Search",
-          "desc": "Search npm nodejs",
-          "path": "/search/npm?q=",
-          "status": "ready",
-          "params": {
-            "q": "Kata kunci pencarian package NPM"
-          }
-        },        
-        {
-          "name": "Fdroid",
-          "desc": "Search apk fdroid",
-          "path": "/search/fdroid?q=",
-          "status": "ready",
-          "params": {
-            "q": "Kata kunci pencarian aplikasi di F-Droid"
-          }
-        },    
-        {
-          "name": "Happymod",
-          "desc": "Search apk happymod",
-          "path": "/search/happymod?q=",
-          "status": "ready",
-          "params": {
-            "q": "Kata kunci pencarian aplikasi di Happymod"
-          }
-        },           
-        {
-          "name": "Tiktok",
-          "desc": "Search tiktok video",
-          "path": "/search/tiktok?q=",
-          "status": "ready",
-          "params": {
-            "q": "Kata kunci pencarian video TikTok"
-          }
-        }, 
-        {
-          "name": "XNXX Search",
-          "desc": "Search xnxx video",
-          "path": "/search/xnxx?q=",
-          "status": "ready",
-          "params": {
-            "q": "Kata kunci pencarian video XNXX"
-          }
-        }, 
-        {
-          "name": "Lyrics Search",
-          "desc": "Search lyrics music",
-          "path": "/search/lyrics?q=",
-          "status": "ready",
-          "params": {
-            "q": "Judul lagu atau kata kunci untuk mencari lirik"
-          }
-        }, 
-        {
-          "name": "Sfile Search",
-          "desc": "Search url sfile mobi",
-          "path": "/search/sfile?q=",
-          "status": "ready",
-          "params": {
-            "q": "Kata kunci pencarian file di Sfile"
-          }
-        }                                         
-      ]
-    }, 
-
-    {
-      "name": "Image Creator",
-      "items": [
-        {
-          "name": "Remini",
-          "desc": "Remini image",
-          "path": "/imagecreator/remini?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL gambar yang akan ditingkatkan kualitasnya"
-          }
-        }, 
-        {
-          "name": "Removebg",
-          "desc": "Remove background image",
-          "path": "/imagecreator/removebg?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL gambar yang akan dihapus backgroundnya"
-          }
-        }, 
-        {
-          "name": "Upscale",
-          "desc": "Upscale image",
-          "path": "/imagecreator/upscale?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL gambar yang akan ditingkatkan resolusinya"
-          }
-        }, 
-        {
-          "name": "Colorize",
-          "desc": "Colorize image",
-          "path": "/imagecreator/colorize?url=",
-          "status": "ready",
-          "params": {
-            "url": "URL gambar hitam putih yang akan diwarnai"
-          }
-        }, 
-        {
-          "name": "Brat",
-          "desc": "Brat text generator",
-          "path": "/imagecreator/brat?text=",
-          "status": "ready",
-          "params": {
-            "text": "Teks yang akan dikonversi menjadi gaya Brat"
-          }
+            "name": "Anime",
+            "items": [
+                {
+                    "name": "beritaanime",
+                    "desc": "mendapatkan berita anime terbaru",
+                    "path": "/anime/beritaanime",
+                    "status": "ready"
+                },
+                {
+                    "name": "update anime",
+                    "desc": "mendapatkan update anime terbaru",
+                    "path": "/anime/latest",
+                    "status": "ready"
+                },
+                {
+                    "name": "hot anime",
+                    "desc": "mendapatkan list anime hot",
+                    "path": "/anime/hot",
+                    "status": "ready"
+                },
+                {
+                    "name": "Search Anime",
+                    "desc": "Mendapatkan info anime",
+                    "path": "/anime/search?q=",
+                    "status": "ready",
+                    "params": {
+                        "q": "isi nama yang ingin di cari"
+                    }
+                },
+                {
+                    "name": "Detail Anime",
+                    "desc": "Mendapatkan info anime Secara detail",
+                    "path": "/anime/detail?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "isi link dari https://animedao.lv"
+                    }
+                }
+            ]
         },
         {
-          "name": "Brat Animated",
-          "desc": "Brat text generator with animation",
-          "path": "/imagecreator/brat-animated?text=",
-          "status": "ready",
-          "params": {
-            "text": "Teks yang akan dikonversi menjadi gaya Brat"
-          }
+            "name": "Downloader",
+            "items": [
+                {
+                    "name": "Aio",
+                    "desc": "All in downloader",
+                    "path": "/download/aio?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL media yang akan diunduh"
+                    }
+                },
+                {
+                    "name": "Tiktok",
+                    "desc": "Downloader tiktok",
+                    "path": "/download/tiktok?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL video TikTok"
+                    }
+                },
+                {
+                    "name": "Douyin",
+                    "desc": "Downloader douyi ",
+                    "path": "/download/douyin?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL douyin"
+                    }
+                },
+                {
+                    "name": "Twitter",
+                    "desc": "Downloader twitter",
+                    "path": "/download/twitter?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL tweet atau video Twitter"
+                    }
+                },
+                {
+                    "name": "Facebook",
+                    "desc": "Downloader facebook",
+                    "path": "/download/facebook?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL video atau post Facebook"
+                    }
+                },
+                {
+                    "name": "Ytmp3",
+                    "desc": "Downloader youtube mp3",
+                    "path": "/download/ytmp3?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL video YouTube untuk dikonversi ke MP3"
+                    }
+                },
+                {
+                    "name": "Ytmp4",
+                    "desc": "Downloader youtube mp4",
+                    "path": "/download/ytmp4?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL video YouTube untuk diunduh sebagai MP4"
+                    }
+                },
+                {
+                    "name": "Instagram",
+                    "desc": "Downloader instagram",
+                    "path": "/download/instagram?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL post atau story Instagram"
+                    }
+                },
+                {
+                    "name": "Pinterest",
+                    "desc": "Downloader pinterest",
+                    "path": "/download/pinterest?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL pin Pinterest"
+                    }
+                },
+                {
+                    "name": "Snackvideo",
+                    "desc": "Downloader snackvideo",
+                    "path": "/download/snackvideo?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL video Snackvideo"
+                    }
+                },
+                {
+                    "name": "Soundcloud",
+                    "desc": "Downloader soundcloud",
+                    "path": "/download/soundcloud?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL track Soundcloud"
+                    }
+                },
+                {
+                    "name": "Terabox",
+                    "desc": "Downloader terabox",
+                    "path": "/download/terabox?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL file Terabox"
+                    }
+                },
+                {
+                    "name": "XNXX",
+                    "desc": "Downloader xnxx",
+                    "path": "/download/xnxx?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL video XNXX"
+                    }
+                },
+                {
+                    "name": "Capcut",
+                    "desc": "Downloader capcut",
+                    "path": "/download/capcut?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL template Capcut"
+                    }
+                },
+                {
+                    "name": "Gdrive",
+                    "desc": "Downloader google drive",
+                    "path": "/download/gdrive?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL file Google Drive"
+                    }
+                },
+                {
+                    "name": "Videy",
+                    "desc": "Downloader videy",
+                    "path": "/download/videy?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL video Videy"
+                    }
+                },
+                {
+                    "name": "Doodstream",
+                    "desc": "Downloader doodstream",
+                    "path": "/download/doodstream?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL video Doodstream"
+                    }
+                }
+            ]
         },
         {
-          "name": "Fake ngl",
-          "desc": "Fake ngl chat for fun",
-          "path": "/imagecreator/ngl?title=&text=",
-          "status": "ready",
-          "params": {
-            "title":"Title untuk judul di ngl",
-            "text": "isi pesan dari ngl"
-          }
+            "name": "Random",
+            "items": [
+                {
+                    "name": "Blue Archive",
+                    "desc": "Random foto blue archive",
+                    "path": "/random/ba",
+                    "status": "ready"
+                },
+                {
+                    "name": "Random Waifu",
+                    "desc": "Random foto waifu",
+                    "path": "/random/waifu",
+                    "status": "ready"
+                },
+                {
+                    "name": "Random Nsfw",
+                    "desc": "Random foto nsfw",
+                    "path": "/random/nsfw",
+                    "status": "ready"
+                },
+                {
+                    "name": "Pap Ayang",
+                    "desc": "Random pap ayang",
+                    "path": "/random/papayang",
+                    "status": "ready"
+                }
+            ]
         },
         {
-          "name": "Welcome",
-          "desc": "Welcome banner generator",
-          "path": "/imagecreator/welcome?bg=&ppuser=&text=",
-          "status": "ready",
-          "params": {
-            "bg":"background untuk banner",
-            "ppuser":"gambar profil pengguna",
-            "text": "isi pesan untuk banner"
-          }
+            "name": "Tools",
+            "items": [
+                {
+                    "name": "Text-to-speech",
+                    "desc": "Tts anime character",
+                    "path": "/tools/text-to-speech?text=",
+                    "status": "ready",
+                    "params": {
+                        "text": "Teks yang akan dikonversi menjadi suara"
+                    }
+                },
+                {
+                    "name": "OCR",
+                    "desc": "Read text from image",
+                    "path": "/tools/ocr?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL gambar yang berisi teks"
+                    }
+                },
+                {
+                    "name": "Screenshot Web",
+                    "desc": "Screenshot web url",
+                    "path": "/tools/ssweb?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL website yang akan diambil screenshot"
+                    }
+                },
+                {
+                    "name": "Emoji Mix",
+                    "desc": "Emoji mix converter",
+                    "path": "/tools/emojimix?emoji1=&emoji2=",
+                    "status": "ready",
+                    "params": {
+                        "emoji1": "Emoji pertama untuk digabungkan",
+                        "emoji2": "Emoji kedua untuk digabungkan"
+                    }
+                },
+                {
+                    "name": "Host Info",
+                    "desc": "Get information host",
+                    "path": "/tools/hostinfo?host=",
+                    "status": "ready",
+                    "params": {
+                        "host": "masukan link atau ip"
+                    }
+                }
+            ]
         },
         {
-          "name": "Goodbye",
-          "desc": "Goodbye banner generator",
-          "path": "/imagecreator/goodbye?bg=&ppuser=&text=",
-          "status": "ready",
-          "params": {
-            "bg":"background untuk banner",
-            "ppuser":"gambar profil pengguna",
-            "text": "isi pesan untuk banner"
-          }
+            "name": "Search",
+            "items": [
+                {
+                    "name": "Youtube Search",
+                    "desc": "Search youtube",
+                    "path": "/search/youtube?q=",
+                    "status": "ready",
+                    "params": {
+                        "q": "Kata kunci pencarian YouTube"
+                    }
+                },
+                {
+                    "name": "Google Image",
+                    "desc": "Search foto google",
+                    "path": "/search/gimage?q=",
+                    "status": "ready",
+                    "params": {
+                        "q": "Kata kunci pencarian gambar Google"
+                    }
+                },
+                {
+                    "name": "Playstore",
+                    "desc": "Search apk playstore",
+                    "path": "/search/playstore?q=",
+                    "status": "ready",
+                    "params": {
+                        "q": "Kata kunci pencarian aplikasi di Playstore"
+                    }
+                },
+                {
+                    "name": "Npm Search",
+                    "desc": "Search npm nodejs",
+                    "path": "/search/npm?q=",
+                    "status": "ready",
+                    "params": {
+                        "q": "Kata kunci pencarian package NPM"
+                    }
+                },
+                {
+                    "name": "Fdroid",
+                    "desc": "Search apk fdroid",
+                    "path": "/search/fdroid?q=",
+                    "status": "ready",
+                    "params": {
+                        "q": "Kata kunci pencarian aplikasi di F-Droid"
+                    }
+                },
+                {
+                    "name": "Happymod",
+                    "desc": "Search apk happymod",
+                    "path": "/search/happymod?q=",
+                    "status": "ready",
+                    "params": {
+                        "q": "Kata kunci pencarian aplikasi di Happymod"
+                    }
+                },
+                {
+                    "name": "Tiktok",
+                    "desc": "Search tiktok video",
+                    "path": "/search/tiktok?q=",
+                    "status": "ready",
+                    "params": {
+                        "q": "Kata kunci pencarian video TikTok"
+                    }
+                },
+                {
+                    "name": "XNXX Search",
+                    "desc": "Search xnxx video",
+                    "path": "/search/xnxx?q=",
+                    "status": "ready",
+                    "params": {
+                        "q": "Kata kunci pencarian video XNXX"
+                    }
+                },
+                {
+                    "name": "Lyrics Search",
+                    "desc": "Search lyrics music",
+                    "path": "/search/lyrics?q=",
+                    "status": "ready",
+                    "params": {
+                        "q": "Judul lagu atau kata kunci untuk mencari lirik"
+                    }
+                },
+                {
+                    "name": "Sfile Search",
+                    "desc": "Search url sfile mobi",
+                    "path": "/search/sfile?q=",
+                    "status": "ready",
+                    "params": {
+                        "q": "Kata kunci pencarian file di Sfile"
+                    }
+                }
+            ]
         },
         {
-          "name": "Demote",
-          "desc": "Demote banner generator",
-          "path": "/imagecreator/demote?bg=&ppuser=&text=",
-          "status": "ready",
-          "params": {
-            "bg":"background untuk banner",
-            "ppuser":"gambar profil pengguna",
-            "text": "isi pesan untuk banner"
-          }
+            "name": "Image Creator",
+            "items": [
+                {
+                    "name": "Remini",
+                    "desc": "Remini image",
+                    "path": "/imagecreator/remini?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL gambar yang akan ditingkatkan kualitasnya"
+                    }
+                },
+                {
+                    "name": "Removebg",
+                    "desc": "Remove background image",
+                    "path": "/imagecreator/removebg?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL gambar yang akan dihapus backgroundnya"
+                    }
+                },
+                {
+                    "name": "Upscale",
+                    "desc": "Upscale image",
+                    "path": "/imagecreator/upscale?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL gambar yang akan ditingkatkan resolusinya"
+                    }
+                },
+                {
+                    "name": "Colorize",
+                    "desc": "Colorize image",
+                    "path": "/imagecreator/colorize?url=",
+                    "status": "ready",
+                    "params": {
+                        "url": "URL gambar hitam putih yang akan diwarnai"
+                    }
+                },
+                {
+                    "name": "Brat",
+                    "desc": "Brat text generator",
+                    "path": "/imagecreator/brat?text=",
+                    "status": "ready",
+                    "params": {
+                        "text": "Teks yang akan dikonversi menjadi gaya Brat"
+                    }
+                },
+                {
+                    "name": "Brat Animated",
+                    "desc": "Brat text generator with animation",
+                    "path": "/imagecreator/brat-animated?text=",
+                    "status": "ready",
+                    "params": {
+                        "text": "Teks yang akan dikonversi menjadi gaya Brat"
+                    }
+                },
+                {
+                    "name": "Fake ngl",
+                    "desc": "Fake ngl chat for fun",
+                    "path": "/imagecreator/ngl?title=&text=",
+                    "status": "ready",
+                    "params": {
+                        "title": "Title untuk judul di ngl",
+                        "text": "isi pesan dari ngl"
+                    }
+                },
+                {
+                    "name": "Welcome",
+                    "desc": "Welcome banner generator",
+                    "path": "/imagecreator/welcome?bg=&ppuser=&text=",
+                    "status": "ready",
+                    "params": {
+                        "bg": "background untuk banner",
+                        "ppuser": "gambar profil pengguna",
+                        "text": "isi pesan untuk banner"
+                    }
+                },
+                {
+                    "name": "Goodbye",
+                    "desc": "Goodbye banner generator",
+                    "path": "/imagecreator/goodbye?bg=&ppuser=&text=",
+                    "status": "ready",
+                    "params": {
+                        "bg": "background untuk banner",
+                        "ppuser": "gambar profil pengguna",
+                        "text": "isi pesan untuk banner"
+                    }
+                },
+                {
+                    "name": "Demote",
+                    "desc": "Demote banner generator",
+                    "path": "/imagecreator/demote?bg=&ppuser=&text=",
+                    "status": "ready",
+                    "params": {
+                        "bg": "background untuk banner",
+                        "ppuser": "gambar profil pengguna",
+                        "text": "isi pesan untuk banner"
+                    }
+                },
+                {
+                    "name": "Promote",
+                    "desc": "Promote banner generator",
+                    "path": "/imagecreator/Promote?bg=&ppuser=&text=",
+                    "status": "ready",
+                    "params": {
+                        "bg": "background untuk banner",
+                        "ppuser": "gambar profil pengguna",
+                        "text": "isi pesan untuk banner"
+                    }
+                },
+                {
+                    "name": "iPhone Quoted Chat",
+                    "desc": "Buat Kata-kata ala chat iPhone",
+                    "path": "/imagecreator/iqc?text=",
+                    "status": "ready",
+                    "params": {
+                        "text": "isi kata-kata mu maksimal 80 karakter"
+                    }
+                },
+                {
+                    "name": "Fake Tiktok",
+                    "desc": "Fake Profil Tiktok, parameter lengkap cek di channel",
+                    "path": "/imagecreator/faketiktok?name=&username=&pp=",
+                    "status": "ready",
+                    "params": {
+                        "name": "Nama untuk tiktok",
+                        "username": "Username Tiktok",
+                        "pp": "foto profil Tiktok"
+                    }
+                }
+            ]
         },
         {
-          "name": "Promote",
-          "desc": "Promote banner generator",
-          "path": "/imagecreator/Promote?bg=&ppuser=&text=",
-          "status": "ready",
-          "params": {
-            "bg":"background untuk banner",
-            "ppuser":"gambar profil pengguna",
-            "text": "isi pesan untuk banner"
+            "name": "API",
+            "items": [
+                {
+                    "name": "Status Api",
+                    "desc": "Check API service status",
+                    "path": "/api/status",
+                    "status": "ready"
+                }
+            ]
         }
-        },
-        {
-          "name": "iPhone Quoted Chat",
-          "desc": "Buat Kata-kata ala chat iPhone",
-          "path": "/imagecreator/iqc?text=",
-          "status": "ready",
-          "params": {
-            "text": "isi kata-kata mu maksimal 80 karakter"
-          }
-        },
-        {
-          "name": "Fake Tiktok",
-          "desc": "Fake Profil Tiktok, parameter lengkap cek di channel",
-          "path": "/imagecreator/faketiktok?name=&username=&pp=",
-          "status": "ready",
-          "params": {
-            "name":"Nama untuk tiktok",
-            "username":"Username Tiktok",
-            "pp": "foto profil Tiktok"
-          }
-        }
-      ]
-    }, 
-    {
-      "name": "API",
-      "items": [
-        {
-          "name": "Status Api",
-          "desc": "Check API service status",
-          "path": "/api/status",
-          "status": "ready"
-        }                        
-      ]
-    }               
-  ]
-        }
+    ]
+}

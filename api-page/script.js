@@ -13,8 +13,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         clearSearchBtn: document.getElementById('clearSearch'),
         apiContent: document.getElementById('apiContent'),
         notificationToast: document.getElementById('notificationToast'),
+        notificationBellBtn: document.getElementById('notificationBellBtn'), // Tombol lonceng
+        notificationBadgeCircle: document.getElementById('notificationBadgeCircle'), // Badge lingkaran merah
         modal: {
-            instance: null, // Akan diinisialisasi nanti
+            instance: null, 
             element: document.getElementById('apiResponseModal'),
             label: document.getElementById('apiResponseModalLabel'),
             desc: document.getElementById('apiResponseModalDesc'),
@@ -27,10 +29,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             copyEndpointBtn: document.getElementById('copyEndpoint'),
             copyResponseBtn: document.getElementById('copyResponse')
         },
-        // Elemen yang diisi dari settings.json
         pageTitle: document.getElementById('page'),
         wm: document.getElementById('wm'),
-        headerName: document.getElementById('header'), // ID ini sepertinya tidak ada di HTML, mungkin maksudnya #name atau #sideNavName
         appName: document.getElementById('name'),
         sideNavName: document.getElementById('sideNavName'),
         versionBadge: document.getElementById('version'),
@@ -40,30 +40,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         apiLinksContainer: document.getElementById('apiLinks')
     };
 
-    let settings = {}; // Untuk menyimpan data dari settings.json
-    let currentApiData = null; // Untuk menyimpan data API yang sedang ditampilkan di modal
+    let settings = {}; 
+    let currentApiData = null; 
+    let notifications = []; // Menyimpan notifikasi dari JSON
+    let readNotificationIds = new Set(); // Menyimpan ID notifikasi yang sudah dibaca
 
     // --- Fungsi Utilitas ---
-    const showToast = (message, type = 'info') => {
+    const showToast = (message, type = 'info', title = null, iconClass = null) => {
         if (!DOM.notificationToast) return;
         const toastBody = DOM.notificationToast.querySelector('.toast-body');
-        const toastTitle = DOM.notificationToast.querySelector('.toast-title');
-        const toastIcon = DOM.notificationToast.querySelector('.toast-icon');
+        const toastTitleEl = DOM.notificationToast.querySelector('.toast-title');
+        const toastIconEl = DOM.notificationToast.querySelector('.toast-icon');
         
         toastBody.textContent = message;
         
         const typeConfig = {
-            success: { color: 'var(--success-color)', icon: 'fa-check-circle' },
-            error: { color: 'var(--error-color)', icon: 'fa-exclamation-circle' },
-            info: { color: 'var(--primary-color)', icon: 'fa-info-circle' }
+            success: { color: 'var(--success-color)', defaultIcon: 'fa-check-circle', defaultTitle: 'Sukses' },
+            error: { color: 'var(--error-color)', defaultIcon: 'fa-exclamation-circle', defaultTitle: 'Kesalahan' },
+            info: { color: 'var(--primary-color)', defaultIcon: 'fa-info-circle', defaultTitle: 'Informasi' },
+            warning: { color: 'var(--warning-color)', defaultIcon: 'fa-exclamation-triangle', defaultTitle: 'Peringatan'}
         };
         
         const config = typeConfig[type] || typeConfig.info;
         
         DOM.notificationToast.style.borderLeftColor = config.color;
-        toastIcon.className = `toast-icon fas ${config.icon} me-2`;
-        toastIcon.style.color = config.color;
-        toastTitle.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+        toastIconEl.className = `toast-icon fas ${iconClass || config.defaultIcon} me-2`;
+        toastIconEl.style.color = config.color;
+        toastTitleEl.textContent = title || config.defaultTitle;
         
         const bsToast = bootstrap.Toast.getOrCreateInstance(DOM.notificationToast);
         bsToast.show();
@@ -76,17 +79,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         try {
             await navigator.clipboard.writeText(text);
-            const originalIcon = btnElement.innerHTML;
-            btnElement.innerHTML = '<i class="fas fa-check"></i>';
+            const originalIconHTML = btnElement.innerHTML; // Simpan HTML ikon asli
+            btnElement.innerHTML = '<i class="fas fa-check text-success"></i>'; // Ikon centang dengan warna sukses
             btnElement.classList.add('copy-success');
-            showToast('Berhasil disalin ke clipboard!', 'success');
+            showToast('Berhasil disalin!', 'success'); // Pesan lebih singkat
             
             setTimeout(() => {
-                btnElement.innerHTML = originalIcon;
+                btnElement.innerHTML = originalIconHTML; // Kembalikan ikon asli
                 btnElement.classList.remove('copy-success');
             }, 1500);
         } catch (err) {
-            showToast('Gagal menyalin teks: ' + err, 'error');
+            showToast('Gagal menyalin: ' + err.message, 'error'); // Tampilkan pesan error dari exception
         }
     };
 
@@ -104,18 +107,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         initTheme();
         initSideNav();
         initModal();
+        loadReadNotifications(); // Muat notifikasi yang sudah dibaca
         
         try {
-            const response = await fetch('/src/settings.json');
-            if (!response.ok) throw new Error(`Gagal memuat pengaturan: ${response.status}`);
-            settings = await response.json();
+            // Memuat settings.json dan notifications.json secara paralel
+            const [settingsResponse, notificationsResponse] = await Promise.all([
+                fetch('/src/settings.json'),
+                fetch('/notifications.json') // Path ke notifications.json
+            ]);
+
+            if (!settingsResponse.ok) throw new Error(`Gagal memuat pengaturan: ${settingsResponse.status}`);
+            settings = await settingsResponse.json();
+            
+            if (!notificationsResponse.ok) throw new Error(`Gagal memuat notifikasi: ${notificationsResponse.status}`);
+            notifications = await notificationsResponse.json();
+
             populatePageContent();
             renderApiCategories();
+            processNotifications(); // Proses notifikasi setelah data dimuat
             observeApiItems();
+
         } catch (error) {
-            console.error('Error loading settings:', error);
-            showToast(`Gagal memuat pengaturan: ${error.message}`, 'error');
-            displayErrorState("Tidak dapat memuat konfigurasi API.");
+            console.error('Error during initialization:', error);
+            showToast(`Terjadi kesalahan: ${error.message}`, 'error');
+            if (DOM.apiContent) displayErrorState("Tidak dapat memuat konfigurasi atau notifikasi API.");
         } finally {
             hideLoadingScreen();
         }
@@ -127,8 +142,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (DOM.themeToggle) DOM.themeToggle.addEventListener('change', handleThemeToggle);
         if (DOM.searchInput) DOM.searchInput.addEventListener('input', debounce(handleSearch, 300));
         if (DOM.clearSearchBtn) DOM.clearSearchBtn.addEventListener('click', clearSearch);
+        if (DOM.notificationBellBtn) DOM.notificationBellBtn.addEventListener('click', handleNotificationBellClick);
         
-        // Delegasi event untuk tombol "GET" API
         if (DOM.apiContent) DOM.apiContent.addEventListener('click', handleApiGetButtonClick);
 
         if (DOM.modal.copyEndpointBtn) DOM.modal.copyEndpointBtn.addEventListener('click', () => copyToClipboard(DOM.modal.endpoint.textContent, DOM.modal.copyEndpointBtn));
@@ -141,6 +156,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Manajemen Loading Screen ---
     const hideLoadingScreen = () => {
+        // ... (fungsi sama seperti sebelumnya) ...
         if (!DOM.loadingScreen) return;
         const loadingDots = DOM.loadingScreen.querySelector(".loading-dots");
         if (loadingDots && loadingDots.intervalId) clearInterval(loadingDots.intervalId);
@@ -153,6 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     
     const animateLoadingDots = () => {
+        // ... (fungsi sama seperti sebelumnya) ...
         const loadingDots = DOM.loadingScreen.querySelector(".loading-dots");
         if (loadingDots) {
             loadingDots.intervalId = setInterval(() => {
@@ -164,9 +181,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 500);
         }
     };
-    animateLoadingDots(); // Panggil animasi titik saat skrip dimuat
+    animateLoadingDots();
 
     // --- Manajemen Tema ---
+    // ... (fungsi initTheme dan handleThemeToggle sama seperti sebelumnya) ...
     const initTheme = () => {
         const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         const savedTheme = localStorage.getItem('darkMode');
@@ -180,18 +198,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         DOM.body.classList.toggle('dark-mode');
         const isDarkMode = DOM.body.classList.contains('dark-mode');
         localStorage.setItem('darkMode', isDarkMode);
-        showToast(`Beralih ke mode ${isDarkMode ? 'gelap' : 'terang'}`, 'success');
+        showToast(`Beralih ke mode ${isDarkMode ? 'gelap' : 'terang'}`, 'success', 'Mode Tampilan');
     };
 
     // --- Manajemen Navigasi Samping ---
-    const initSideNav = () => {
-        // Atur state awal tombol collapse berdasarkan class di sideNav
+    // ... (fungsi initSideNav, toggleSideNavCollapse, toggleSideNavMobile, closeSideNavOnClickOutside, handleScroll sama seperti sebelumnya) ...
+     const initSideNav = () => {
         if (DOM.sideNav && DOM.navCollapseBtn) {
              const isCollapsed = DOM.sideNav.classList.contains('collapsed');
              DOM.navCollapseBtn.setAttribute('aria-expanded', !isCollapsed);
         }
     };
-    
     const toggleSideNavCollapse = () => {
         if (!DOM.sideNav || !DOM.mainWrapper || !DOM.navCollapseBtn) return;
         DOM.sideNav.classList.toggle('collapsed');
@@ -199,14 +216,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isExpanded = !DOM.sideNav.classList.contains('collapsed');
         DOM.navCollapseBtn.setAttribute('aria-expanded', isExpanded);
     };
-
     const toggleSideNavMobile = () => {
         if (!DOM.sideNav || !DOM.menuToggle) return;
         DOM.sideNav.classList.toggle('active');
         const isActive = DOM.sideNav.classList.contains('active');
         DOM.menuToggle.setAttribute('aria-expanded', isActive);
     };
-
     const closeSideNavOnClickOutside = (e) => {
         if (!DOM.sideNav || !DOM.menuToggle) return;
         if (window.innerWidth < 992 &&
@@ -217,45 +232,42 @@ document.addEventListener('DOMContentLoaded', async () => {
             DOM.menuToggle.setAttribute('aria-expanded', 'false');
         }
     };
-    
     const handleScroll = () => {
         const scrollPosition = window.scrollY;
+        const headerHeight = DOM.headerHeight ? parseInt(getComputedStyle(document.querySelector('.main-header')).height) : 70;
         document.querySelectorAll('section[id]').forEach(section => {
-            const sectionTop = section.offsetTop - (DOM.headerHeight ? parseInt(getComputedStyle(DOM.headerHeight).height) : 80); // Perbaiki pengambilan tinggi header
+            const sectionTop = section.offsetTop - headerHeight - 20; // Offset tambahan
             const sectionHeight = section.offsetHeight;
             const sectionId = section.getAttribute('id');
             
             const navLink = document.querySelector(`.side-nav-link[href="#${sectionId}"]`);
             if (navLink) {
                 if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                    document.querySelectorAll('.side-nav-link').forEach(l => l.classList.remove('active'));
+                    document.querySelectorAll('.side-nav-link.active').forEach(l => {
+                        l.classList.remove('active');
+                        l.removeAttribute('aria-current');
+                    });
                     navLink.classList.add('active');
                     navLink.setAttribute('aria-current', 'page');
-                } else {
-                    navLink.classList.remove('active');
-                    navLink.removeAttribute('aria-current');
                 }
             }
         });
     };
 
-
     // --- Inisialisasi Modal ---
+    // ... (fungsi initModal sama seperti sebelumnya) ...
     const initModal = () => {
         if (DOM.modal.element) {
             DOM.modal.instance = new bootstrap.Modal(DOM.modal.element);
         }
     };
 
+
     // --- Pengisian Konten Halaman ---
+    // ... (fungsi setPageContent, setPageAttribute, populatePageContent sama seperti sebelumnya) ...
     const setPageContent = (element, value, fallback = '') => {
         if (element) element.textContent = value || fallback;
     };
-    
-    const setPageAttribute = (element, attribute, value, fallback = '') => {
-        if (element) element.setAttribute(attribute, value || fallback);
-    };
-
     const populatePageContent = () => {
         if (!settings || Object.keys(settings).length === 0) return;
 
@@ -263,27 +275,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         const creator = settings.apiSettings?.creator || 'FlowFalcon';
 
         setPageContent(DOM.pageTitle, settings.name, "Falcon API");
+        document.title = settings.name || "Falcon API"; // Update judul tab browser juga
         setPageContent(DOM.wm, `© ${currentYear} ${creator}. Semua hak dilindungi.`);
-        // setPageContent(DOM.headerName, settings.name, "Skyzopedia UI"); // Perlu dicek ID 'header'
         setPageContent(DOM.appName, settings.name, "Falcon API");
         setPageContent(DOM.sideNavName, settings.name || "API");
         setPageContent(DOM.versionBadge, settings.version, "v1.0");
         setPageContent(DOM.versionHeaderBadge, settings.header?.status, "Aktif!");
         setPageContent(DOM.appDescription, settings.description, "Dokumentasi API simpel dan mudah digunakan.");
 
-        if (DOM.dynamicImage) {
-            DOM.dynamicImage.src = settings.bannerImage || '/src/banner.jpg'; // Fallback banner
+        if (DOM.dynamicImage && settings.bannerImage) { // Hanya set jika bannerImage ada di settings
+            DOM.dynamicImage.src = settings.bannerImage;
             DOM.dynamicImage.alt = settings.name ? `${settings.name} Banner` : "API Banner";
             DOM.dynamicImage.onerror = () => {
-                DOM.dynamicImage.src = '/src/banner.jpg'; // Fallback jika error
-                showToast('Gagal memuat gambar banner, menggunakan gambar default.', 'error');
+                // Sembunyikan banner jika gagal dimuat, atau gunakan placeholder
+                DOM.dynamicImage.style.display = 'none'; 
+                // DOM.dynamicImage.src = '/path/to/default/placeholder.jpg';
+                showToast('Gagal memuat gambar banner.', 'warning', 'Banner');
             };
+        } else if (DOM.dynamicImage) {
+            DOM.dynamicImage.style.display = 'none'; // Sembunyikan jika tidak ada bannerImage di settings
         }
         
-        // Mengisi tautan di hero section
         if (DOM.apiLinksContainer) {
-            DOM.apiLinksContainer.innerHTML = ''; // Bersihkan tautan yang ada
-            const defaultLinks = [{ url: "https://github.com/FlowFalcon/falcon-api", name: "Lihat di GitHub", icon: "fab fa-github" }];
+            DOM.apiLinksContainer.innerHTML = ''; 
+            const defaultLinks = [{ url: "https://github.com/FlowFalcon/falcon-api", name: "GitHub", icon: "fab fa-github" }];
             const linksToRender = settings.links?.length ? settings.links : defaultLinks;
 
             linksToRender.forEach(({ url, name, icon }, index) => {
@@ -291,33 +306,34 @@ document.addEventListener('DOMContentLoaded', async () => {
                 link.href = url;
                 link.target = '_blank';
                 link.rel = 'noopener noreferrer';
-                link.className = 'api-link btn btn-primary'; // Menggunakan class btn untuk styling
+                link.className = 'btn btn-primary'; // Menggunakan class btn untuk styling
                 link.style.animationDelay = `${index * 0.1}s`;
                 link.setAttribute('aria-label', name);
                 
                 const iconElement = document.createElement('i');
-                iconElement.className = icon || 'fas fa-external-link-alt'; // Default icon
+                iconElement.className = `${icon || 'fas fa-external-link-alt'} me-2`; 
                 iconElement.setAttribute('aria-hidden', 'true');
                 
                 link.appendChild(iconElement);
-                link.appendChild(document.createTextNode(` ${name}`));
+                link.appendChild(document.createTextNode(name));
                 DOM.apiLinksContainer.appendChild(link);
             });
         }
     };
 
     // --- Render Kategori dan Item API ---
+    // ... (fungsi renderApiCategories dan displayErrorState sama seperti sebelumnya) ...
     const renderApiCategories = () => {
         if (!DOM.apiContent || !settings.categories || !settings.categories.length) {
             displayErrorState("Tidak ada kategori API yang ditemukan.");
             return;
         }
-        DOM.apiContent.innerHTML = ''; // Bersihkan konten sebelumnya
+        DOM.apiContent.innerHTML = ''; 
 
         settings.categories.forEach((category, categoryIndex) => {
             const sortedItems = category.items.sort((a, b) => a.name.localeCompare(b.name));
             
-            const categorySection = document.createElement('section'); // Menggunakan section untuk kategori
+            const categorySection = document.createElement('section'); 
             categorySection.id = `category-${category.name.toLowerCase().replace(/\s+/g, '-')}`;
             categorySection.className = 'category-section';
             categorySection.style.animationDelay = `${categoryIndex * 0.15}s`;
@@ -327,7 +343,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             categoryHeader.id = `category-title-${categoryIndex}`;
             categoryHeader.className = 'category-header';
             
-            if (category.icon) { // Menambahkan ikon kategori jika ada
+            if (category.icon) { 
                 const iconEl = document.createElement('i');
                 iconEl.className = `${category.icon} me-2`;
                 iconEl.setAttribute('aria-hidden', 'true');
@@ -340,8 +356,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const img = document.createElement('img');
                 img.src = category.image;
                 img.alt = `${category.name} banner`;
-                img.className = 'category-image img-fluid rounded mb-3 shadow-sm'; // Bootstrap classes
-                img.loading = 'lazy'; // Lazy loading untuk gambar kategori
+                img.className = 'category-image img-fluid rounded mb-3 shadow-sm'; 
+                img.loading = 'lazy'; 
                 categorySection.appendChild(img);
             }
 
@@ -350,15 +366,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             sortedItems.forEach((item, itemIndex) => {
                 const itemCol = document.createElement('div');
-                // Menggunakan class Bootstrap untuk kolom responsif
                 itemCol.className = 'col-12 col-md-6 col-lg-4 api-item'; 
                 itemCol.dataset.name = item.name;
                 itemCol.dataset.desc = item.desc;
                 itemCol.dataset.category = category.name;
                 itemCol.style.animationDelay = `${itemIndex * 0.05 + 0.2}s`;
 
-                const apiCard = document.createElement('article'); // Menggunakan article untuk setiap item API
-                apiCard.className = 'api-card h-100'; // h-100 untuk tinggi yang sama
+                const apiCard = document.createElement('article'); 
+                apiCard.className = 'api-card h-100'; 
                 apiCard.setAttribute('aria-labelledby', `api-title-${categoryIndex}-${itemIndex}`);
 
                 const cardInfo = document.createElement('div');
@@ -366,30 +381,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const itemTitle = document.createElement('h5');
                 itemTitle.id = `api-title-${categoryIndex}-${itemIndex}`;
-                itemTitle.className = 'mb-1'; // Mengurangi margin bawah
+                itemTitle.className = 'mb-1'; 
                 itemTitle.textContent = item.name;
                 
                 const itemDesc = document.createElement('p');
-                itemDesc.className = 'text-muted mb-0';
+                itemDesc.className = 'text-muted mb-0 small'; // Ukuran font deskripsi lebih kecil
                 itemDesc.textContent = item.desc;
                 
                 cardInfo.appendChild(itemTitle);
                 cardInfo.appendChild(itemDesc);
                 
                 const actionsDiv = document.createElement('div');
-                actionsDiv.className = 'api-actions mt-auto'; // mt-auto untuk mendorong ke bawah
+                actionsDiv.className = 'api-actions mt-auto'; 
                 
                 const getBtn = document.createElement('button');
                 getBtn.type = 'button';
-                getBtn.className = 'btn get-api-btn btn-sm'; // btn-sm untuk ukuran lebih kecil
+                getBtn.className = 'btn get-api-btn btn-sm'; 
                 getBtn.innerHTML = '<i class="fas fa-code me-1" aria-hidden="true"></i> GET';
                 getBtn.dataset.apiPath = item.path;
                 getBtn.dataset.apiName = item.name;
                 getBtn.dataset.apiDesc = item.desc;
-                // Simpan data parameter jika ada
                 if (item.params) getBtn.dataset.apiParams = JSON.stringify(item.params);
                 if (item.innerDesc) getBtn.dataset.apiInnerDesc = item.innerDesc;
-
                 getBtn.setAttribute('aria-label', `Dapatkan detail untuk ${item.name}`);
                 
                 const status = item.status || "ready";
@@ -417,9 +430,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             categorySection.appendChild(itemsRow);
             DOM.apiContent.appendChild(categorySection);
         });
-        initializeTooltips(); // Inisialisasi tooltip setelah elemen dibuat
+        initializeTooltips(); 
     };
-
     const displayErrorState = (message) => {
         if (!DOM.apiContent) return;
         DOM.apiContent.innerHTML = `
@@ -433,8 +445,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
         `;
     };
-    
+
     // --- Fungsi Pencarian ---
+    // ... (fungsi handleSearch, clearSearch, createNoResultsMessage sama seperti sebelumnya) ...
     const handleSearch = () => {
         if (!DOM.searchInput || !DOM.apiContent) return;
         const searchTerm = DOM.searchInput.value.toLowerCase().trim();
@@ -469,23 +482,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             noResultsMsg.style.display = 'none';
         }
     };
-
     const clearSearch = () => {
         if (!DOM.searchInput) return;
         DOM.searchInput.value = '';
         DOM.searchInput.focus();
-        handleSearch(); // Memanggil handleSearch untuk memperbarui tampilan
+        handleSearch(); 
         DOM.searchInput.classList.add('shake-animation');
         setTimeout(() => DOM.searchInput.classList.remove('shake-animation'), 400);
     };
-
     const createNoResultsMessage = () => {
         let noResultsMsg = document.getElementById('noResultsMessage');
         if (!noResultsMsg) {
             noResultsMsg = document.createElement('div');
             noResultsMsg.id = 'noResultsMessage';
             noResultsMsg.className = 'no-results-message flex-column align-items-center justify-content-center p-5 text-center';
-            noResultsMsg.style.display = 'none'; // Sembunyikan secara default
+            noResultsMsg.style.display = 'none'; 
             noResultsMsg.innerHTML = `
                 <i class="fas fa-search fa-3x text-muted mb-3"></i>
                 <p class="h5">Tidak ada hasil untuk <span></span></p>
@@ -499,7 +510,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         return noResultsMsg;
     };
 
+
     // --- Penanganan Klik Tombol API ---
+    // ... (fungsi handleApiGetButtonClick, setupModalForApi, validateModalInputs, handleSubmitQuery, handleApiRequest sama seperti sebelumnya, dengan penyesuaian kecil jika perlu) ...
     const handleApiGetButtonClick = (event) => {
         const getApiBtn = event.target.closest('.get-api-btn');
         if (!getApiBtn) return;
@@ -516,25 +529,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         
         setupModalForApi(currentApiData);
-        DOM.modal.instance.show();
+        if (DOM.modal.instance) DOM.modal.instance.show();
     };
-
     const setupModalForApi = (apiData) => {
         DOM.modal.label.textContent = apiData.name;
         DOM.modal.desc.textContent = apiData.desc;
-        DOM.modal.content.innerHTML = ''; // Bersihkan konten respons sebelumnya
-        DOM.modal.endpoint.textContent = `${window.location.origin}${apiData.path.split('?')[0]}`; // Tampilkan base path
+        DOM.modal.content.innerHTML = ''; 
+        DOM.modal.endpoint.textContent = `${window.location.origin}${apiData.path.split('?')[0]}`; 
         
         DOM.modal.spinner.classList.add('d-none');
         DOM.modal.content.classList.add('d-none');
         DOM.modal.container.classList.add('d-none');
-        DOM.modal.endpoint.classList.remove('d-none'); // Selalu tampilkan endpoint
+        DOM.modal.endpoint.classList.remove('d-none'); 
 
         DOM.modal.queryInputContainer.innerHTML = '';
         DOM.modal.submitBtn.classList.add('d-none');
         DOM.modal.submitBtn.disabled = true;
         DOM.modal.submitBtn.innerHTML = '<span>Kirim</span><i class="fas fa-paper-plane ms-2" aria-hidden="true"></i>';
-
 
         const paramsFromPath = new URLSearchParams(apiData.path.split('?')[1]);
         const paramKeys = Array.from(paramsFromPath.keys());
@@ -594,27 +605,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (apiData.innerDesc) {
                 const innerDescDiv = document.createElement('div');
-                innerDescDiv.className = 'inner-desc mt-3';
+                innerDescDiv.className = 'inner-desc mt-3 p-2 small'; // Padding lebih kecil, font lebih kecil
                 innerDescDiv.innerHTML = `<i class="fas fa-info-circle me-2" aria-hidden="true"></i> ${apiData.innerDesc.replace(/\n/g, '<br>')}`;
                 paramContainer.appendChild(innerDescDiv);
             }
 
             DOM.modal.queryInputContainer.appendChild(paramContainer);
             DOM.modal.submitBtn.classList.remove('d-none');
-            initializeTooltips(DOM.modal.queryInputContainer); // Inisialisasi tooltip di dalam modal
+            initializeTooltips(DOM.modal.queryInputContainer); 
         } else {
-            // Jika tidak ada parameter, langsung panggil API
             handleApiRequest(`${window.location.origin}${apiData.path}`, apiData.name);
         }
     };
-    
     const validateModalInputs = () => {
         const inputs = DOM.modal.queryInputContainer.querySelectorAll('input[required]');
         const allFilled = Array.from(inputs).every(input => input.value.trim() !== '');
         DOM.modal.submitBtn.disabled = !allFilled;
         DOM.modal.submitBtn.classList.toggle('btn-active', allFilled);
 
-        // Hapus pesan error jika ada dan input sudah diisi
         inputs.forEach(input => {
             if (input.value.trim()) input.classList.remove('is-invalid');
         });
@@ -624,7 +632,6 @@ document.addEventListener('DOMContentLoaded', async () => {
              setTimeout(() => errorMsg.remove(), 300);
         }
     };
-
     const handleSubmitQuery = async () => {
         if (!currentApiData) return;
 
@@ -656,7 +663,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             errorMsg.classList.remove('fade-out');
             errorMsg.classList.add('fade-in');
 
-
             DOM.modal.submitBtn.classList.add('shake-animation');
             setTimeout(() => DOM.modal.submitBtn.classList.remove('shake-animation'), 500);
             return;
@@ -666,9 +672,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         DOM.modal.submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Memproses...';
 
         const apiUrlWithParams = `${window.location.origin}${currentApiData.path.split('?')[0]}?${newParams.toString()}`;
-        DOM.modal.endpoint.textContent = apiUrlWithParams; // Update endpoint dengan parameter
+        DOM.modal.endpoint.textContent = apiUrlWithParams; 
 
-        // Sembunyikan form input setelah submit
         if (DOM.modal.queryInputContainer.firstChild) {
             DOM.modal.queryInputContainer.firstChild.classList.add('fade-out');
             setTimeout(() => {
@@ -677,19 +682,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
         await handleApiRequest(apiUrlWithParams, currentApiData.name);
-        
-        // Kembalikan tombol submit ke state awal setelah request selesai (baik sukses maupun gagal)
-        // Ini akan ditangani di dalam handleApiRequest bagian finally
     };
-
     const handleApiRequest = async (apiUrl, apiName) => {
         DOM.modal.spinner.classList.remove('d-none');
         DOM.modal.container.classList.add('d-none');
-        DOM.modal.content.innerHTML = ''; // Bersihkan konten sebelumnya
+        DOM.modal.content.innerHTML = ''; 
 
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 20000); // Timeout 20 detik
+            const timeoutId = setTimeout(() => controller.abort(), 20000); 
 
             const response = await fetch(apiUrl, { signal: controller.signal });
             clearTimeout(timeoutId);
@@ -708,7 +709,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 img.alt = apiName;
                 img.className = 'response-image img-fluid rounded shadow-sm fade-in';
                 
-                const downloadBtn = document.createElement('a'); // Menggunakan <a> untuk download
+                const downloadBtn = document.createElement('a'); 
                 downloadBtn.href = imageUrl;
                 downloadBtn.download = `${apiName.toLowerCase().replace(/\s+/g, '-')}.${blob.type.split('/')[1] || 'png'}`;
                 downloadBtn.className = 'btn btn-primary mt-3 w-100';
@@ -721,11 +722,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const data = await response.json();
                 const formattedJson = syntaxHighlightJson(JSON.stringify(data, null, 2));
                 DOM.modal.content.innerHTML = formattedJson;
-                if (JSON.stringify(data, null, 2).split('\n').length > 20) { // Batas baris untuk code folding
+                if (JSON.stringify(data, null, 2).split('\n').length > 20) { 
                     addCodeFolding(DOM.modal.content);
                 }
             } else {
-                // Jika bukan gambar atau JSON, tampilkan sebagai teks biasa
                 const textData = await response.text();
                 DOM.modal.content.textContent = textData || "Respons tidak memiliki konten atau format tidak dikenal.";
             }
@@ -733,7 +733,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             DOM.modal.container.classList.remove('d-none');
             DOM.modal.content.classList.remove('d-none');
             DOM.modal.container.classList.add('slide-in-bottom');
-            showToast(`Berhasil mengambil data untuk ${apiName}`, 'success');
+            showToast(`Berhasil mengambil data untuk ${apiName}`, 'success', 'Sukses');
 
         } catch (error) {
             console.error("API Request Error:", error);
@@ -742,7 +742,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
                     <h6 class="text-danger">Terjadi Kesalahan</h6>
                     <p class="text-muted small">${error.message || 'Tidak dapat mengambil data dari server.'}</p>
-                    ${currentApiData && currentApiData.path.split('?')[1] ? // Hanya tampilkan retry jika ada parameter
+                    ${currentApiData && currentApiData.path.split('?')[1] ? 
                     `<button class="btn btn-sm btn-outline-primary mt-2 retry-query-btn">
                         <i class="fas fa-sync-alt me-1"></i> Coba Lagi
                     </button>` : ''}
@@ -750,34 +750,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             DOM.modal.content.innerHTML = errorHtml;
             DOM.modal.container.classList.remove('d-none');
             DOM.modal.content.classList.remove('d-none');
-            showToast('Gagal mengambil data. Periksa detail di modal.', 'error');
+            showToast('Gagal mengambil data. Periksa detail di modal.', 'error', 'Kesalahan');
 
             const retryBtn = DOM.modal.content.querySelector('.retry-query-btn');
             if (retryBtn) {
                 retryBtn.onclick = () => {
-                    // Tampilkan kembali form input parameter
                     if (DOM.modal.queryInputContainer.firstChild) {
                          DOM.modal.queryInputContainer.firstChild.style.display = '';
                          DOM.modal.queryInputContainer.firstChild.classList.remove('fade-out');
                     }
-                    DOM.modal.submitBtn.disabled = false; // Aktifkan kembali tombol submit
+                    DOM.modal.submitBtn.disabled = false; 
                     DOM.modal.submitBtn.innerHTML = '<span>Kirim</span><i class="fas fa-paper-plane ms-2" aria-hidden="true"></i>';
-                    DOM.modal.container.classList.add('d-none'); // Sembunyikan container response
+                    DOM.modal.container.classList.add('d-none'); 
                 };
             }
-
         } finally {
             DOM.modal.spinner.classList.add('d-none');
-            // Hanya reset tombol submit jika tidak ada parameter (karena request otomatis)
-            // atau jika ada error dan tombol retry tidak ada
-            if (!currentApiData || !currentApiData.path.split('?')[1] || (DOM.modal.content.querySelector('.error-container') && !DOM.modal.content.querySelector('.retry-query-btn'))) {
-                DOM.modal.submitBtn.disabled = !currentApiData || !currentApiData.path.split('?')[1]; // Nonaktifkan jika tidak ada parameter
+            const hasParams = currentApiData && currentApiData.path.split('?')[1];
+            if (!hasParams || (DOM.modal.content.querySelector('.error-container') && !DOM.modal.content.querySelector('.retry-query-btn'))) {
+                DOM.modal.submitBtn.disabled = !hasParams;
                 DOM.modal.submitBtn.innerHTML = '<span>Kirim</span><i class="fas fa-paper-plane ms-2" aria-hidden="true"></i>';
             }
         }
     };
     
     // --- Fungsi Pembantu untuk Tampilan Kode ---
+    // ... (syntaxHighlightJson, addCodeFolding, toggleFold sama seperti sebelumnya) ...
     const syntaxHighlightJson = (json) => {
         json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
@@ -792,40 +790,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             return `<span class="${cls}">${match}</span>`;
         });
     };
-
     const addCodeFolding = (container) => {
         const lines = container.innerHTML.split('\n');
         let currentLevel = 0;
         let foldableHtml = '';
         let inFoldableBlock = false;
-        let blockStartIndex = -1;
 
         lines.forEach((line, index) => {
             const trimmedLine = line.trim();
+            const isLastLine = index === lines.length - 1;
+
             if (trimmedLine.endsWith('{') || trimmedLine.endsWith('[')) {
-                if (currentLevel === 0) { // Mulai blok lipat hanya di level teratas
-                    foldableHtml += `<div class="code-fold-trigger" data-folded="false" role="button" tabindex="0" aria-expanded="true">${line}<span class="fold-indicator ms-2 small text-muted">(<i class="fas fa-chevron-down"></i> Lipat)</span></div><div class="code-fold-content">`;
+                if (currentLevel === 0 && !inFoldableBlock) { 
+                    foldableHtml += `<div class="code-fold-trigger" data-folded="false" role="button" tabindex="0" aria-expanded="true">${line.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')}<span class="fold-indicator ms-2 small text-muted">(<i class="fas fa-chevron-down"></i> Lipat)</span></div><div class="code-fold-content">`;
                     inFoldableBlock = true;
                 } else {
-                    foldableHtml += line + '\n';
+                    foldableHtml += line + (isLastLine ? '' : '\n');
                 }
                 currentLevel++;
             } else if (trimmedLine.startsWith('}') || trimmedLine.startsWith(']')) {
                 currentLevel--;
-                foldableHtml += line + '\n';
+                foldableHtml += line + (isLastLine ? '' : '\n');
                 if (currentLevel === 0 && inFoldableBlock) {
                     foldableHtml += '</div>';
                     inFoldableBlock = false;
                 }
             } else {
-                foldableHtml += line + (index === lines.length - 1 ? '' : '\n');
+                foldableHtml += line + (isLastLine ? '' : '\n');
             }
         });
         container.innerHTML = foldableHtml;
 
         container.querySelectorAll('.code-fold-trigger').forEach(trigger => {
             trigger.addEventListener('click', () => toggleFold(trigger));
-            trigger.addEventListener('keydown', (e) => { // Aksesibilitas keyboard
+            trigger.addEventListener('keydown', (e) => { 
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     toggleFold(trigger);
@@ -833,35 +831,38 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         });
     };
-
     const toggleFold = (trigger) => {
         const content = trigger.nextElementSibling;
+        if (!content || !content.classList.contains('code-fold-content')) return;
+
         const isFolded = trigger.dataset.folded === 'true';
         const indicator = trigger.querySelector('.fold-indicator');
-        const icon = indicator.querySelector('i');
+        const icon = indicator ? indicator.querySelector('i') : null;
 
-        if (isFolded) { // Akan membuka
+        if (isFolded) { 
             content.style.maxHeight = content.scrollHeight + "px";
             trigger.dataset.folded = "false";
             trigger.setAttribute('aria-expanded', 'true');
-            indicator.innerHTML = '(<i class="fas fa-chevron-up"></i> Tutup)';
-            icon.className = 'fas fa-chevron-up';
-
-        } else { // Akan melipat
+            if (indicator && icon) {
+                indicator.innerHTML = '(<i class="fas fa-chevron-up"></i> Tutup)';
+            }
+        } else { 
             content.style.maxHeight = "0px";
             trigger.dataset.folded = "true";
             trigger.setAttribute('aria-expanded', 'false');
-            indicator.innerHTML = '(<i class="fas fa-chevron-down"></i> Buka)';
-            icon.className = 'fas fa-chevron-down';
+             if (indicator && icon) {
+                indicator.innerHTML = '(<i class="fas fa-chevron-down"></i> Buka)';
+            }
         }
     };
     
     // --- Observasi Item API untuk Animasi ---
+    // ... (fungsi observeApiItems sama seperti sebelumnya) ...
     const observeApiItems = () => {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('in-view', 'slideInUp'); // Menambahkan kelas animasi
+                    entry.target.classList.add('in-view', 'slideInUp'); 
                     observer.unobserve(entry.target);
                 }
             });
@@ -873,9 +874,89 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // --- Inisialisasi Tooltip ---
+    // ... (fungsi initializeTooltips sama seperti sebelumnya) ...
     const initializeTooltips = (parentElement = document) => {
         const tooltipTriggerList = [].slice.call(parentElement.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    };
+
+    // --- Sistem Notifikasi ---
+    const NOTIF_STORAGE_KEY = 'readNotifications_falconApi';
+
+    const loadReadNotifications = () => {
+        const stored = localStorage.getItem(NOTIF_STORAGE_KEY);
+        if (stored) {
+            try {
+                readNotificationIds = new Set(JSON.parse(stored));
+            } catch (e) {
+                console.error("Gagal memuat notifikasi yang sudah dibaca:", e);
+                readNotificationIds = new Set(); // Reset jika ada error parsing
+            }
+        }
+    };
+
+    const saveReadNotifications = () => {
+        localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(Array.from(readNotificationIds)));
+    };
+
+    const getRelevantNotifications = () => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalisasi ke awal hari
+
+        return notifications.filter(notif => {
+            const notifDate = new Date(notif.date);
+            notifDate.setHours(0, 0, 0, 0); // Normalisasi
+
+            if (notifDate > today) return false; // Belum tanggalnya
+
+            if (notif.daysVisible) {
+                const expiryDate = new Date(notifDate);
+                expiryDate.setDate(notifDate.getDate() + parseInt(notif.daysVisible, 10));
+                if (today >= expiryDate) return false; // Sudah kadaluarsa
+            }
+            return true; // Notifikasi relevan
+        });
+    };
+
+    const updateNotificationBadge = () => {
+        if (!DOM.notificationBadgeCircle) return;
+        const relevantNotifs = getRelevantNotifications();
+        const unreadCount = relevantNotifs.filter(n => !readNotificationIds.has(n.id)).length;
+
+        if (unreadCount > 0) {
+            DOM.notificationBadgeCircle.classList.remove('hidden');
+            DOM.notificationBellBtn.setAttribute('aria-label', `Notifikasi (${unreadCount} belum dibaca)`);
+        } else {
+            DOM.notificationBadgeCircle.classList.add('hidden');
+            DOM.notificationBellBtn.setAttribute('aria-label', 'Notifikasi (tidak ada yang baru)');
+        }
+    };
+
+    const handleNotificationBellClick = () => {
+        const relevantNotifs = getRelevantNotifications();
+        const unreadNotifs = relevantNotifs.filter(n => !readNotificationIds.has(n.id));
+
+        if (unreadNotifs.length === 0) {
+            showToast("Tidak ada notifikasi baru saat ini.", 'info', 'Notifikasi');
+            return;
+        }
+
+        unreadNotifs.forEach(notif => {
+            // Tampilkan notifikasi menggunakan toast
+            // Anda bisa membuat fungsi displayNotification(notif) yang lebih kompleks jika ingin dropdown
+            showToast(notif.message, 'info', notif.title, notif.icon || 'fa-bell');
+            
+            // Tandai sebagai sudah dibaca
+            readNotificationIds.add(notif.id);
+        });
+
+        saveReadNotifications();
+        updateNotificationBadge(); // Perbarui badge setelah dibaca
+    };
+
+    const processNotifications = () => {
+        // Panggil ini setelah notifikasi dimuat
+        updateNotificationBadge();
     };
 
     // Jalankan inisialisasi utama

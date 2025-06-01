@@ -1,10 +1,8 @@
 [
   {
-    "id": "#01",
-    "date": "2025-05-26",
+    "id": "#02",
+    "date": "2025-06-1",
     "title": "Update Tampilan API!", 
-    "message": "Sekarang Update API mulai dari tampilan, endpoint dan lainya sudah selesai, Selamat Menggunakan.",
-    "daysVisible": 7, 
-    "icon": "fas fa-rocket"
+    "message": "Sekarang ada update baru dari API, Silahkan cek informasinya di saluran WhatsApp kami"
   }
 ]

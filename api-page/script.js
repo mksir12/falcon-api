@@ -12,7 +12,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchInput: document.getElementById('searchInput'),
         clearSearchBtn: document.getElementById('clearSearch'),
         apiContent: document.getElementById('apiContent'),
-        notificationToast: document.getElementById('notificationToast'),
+        notificationToast: document.getElementById('notificationToast'), // Toast untuk notifikasi umum
+        notificationBell: document.getElementById('notificationBell'), // Tombol lonceng
+        notificationBadge: document.getElementById('notificationBadge'), // Badge merah
         modal: {
             instance: null, // Akan diinisialisasi nanti
             element: document.getElementById('apiResponseModal'),
@@ -30,32 +32,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Elemen yang diisi dari settings.json
         pageTitle: document.getElementById('page'),
         wm: document.getElementById('wm'),
-        headerName: document.getElementById('header'), // ID ini sepertinya tidak ada di HTML, mungkin maksudnya #name atau #sideNavName
+        // headerName: document.getElementById('header'), // ID ini sepertinya tidak ada di HTML, mungkin maksudnya #name atau #sideNavName
         appName: document.getElementById('name'),
         sideNavName: document.getElementById('sideNavName'),
         versionBadge: document.getElementById('version'),
         versionHeaderBadge: document.getElementById('versionHeader'),
         appDescription: document.getElementById('description'),
-        dynamicImage: document.getElementById('dynamicImage'),
+        dynamicImage: document.getElementById('dynamicImage'), // Mungkin sudah tidak relevan jika hero visual dihilangkan
         apiLinksContainer: document.getElementById('apiLinks')
     };
 
     let settings = {}; // Untuk menyimpan data dari settings.json
     let currentApiData = null; // Untuk menyimpan data API yang sedang ditampilkan di modal
+    let allNotifications = []; // Untuk menyimpan semua notifikasi dari JSON
 
     // --- Fungsi Utilitas ---
-    const showToast = (message, type = 'info') => {
+    const showToast = (message, type = 'info', title = 'Notifikasi') => { // Menambahkan parameter title
         if (!DOM.notificationToast) return;
         const toastBody = DOM.notificationToast.querySelector('.toast-body');
-        const toastTitle = DOM.notificationToast.querySelector('.toast-title');
+        const toastTitleEl = DOM.notificationToast.querySelector('.toast-title'); // Menggunakan El untuk elemen
         const toastIcon = DOM.notificationToast.querySelector('.toast-icon');
         
         toastBody.textContent = message;
+        toastTitleEl.textContent = title; // Mengatur judul toast
         
         const typeConfig = {
             success: { color: 'var(--success-color)', icon: 'fa-check-circle' },
             error: { color: 'var(--error-color)', icon: 'fa-exclamation-circle' },
-            info: { color: 'var(--primary-color)', icon: 'fa-info-circle' }
+            info: { color: 'var(--primary-color)', icon: 'fa-info-circle' },
+            notification: { color: 'var(--accent-color)', icon: 'fa-bell' } // Tipe baru untuk notifikasi
         };
         
         const config = typeConfig[type] || typeConfig.info;
@@ -63,9 +68,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         DOM.notificationToast.style.borderLeftColor = config.color;
         toastIcon.className = `toast-icon fas ${config.icon} me-2`;
         toastIcon.style.color = config.color;
-        toastTitle.textContent = type.charAt(0).toUpperCase() + type.slice(1);
-        
-        const bsToast = bootstrap.Toast.getOrCreateInstance(DOM.notificationToast);
+        // toastTitleEl.textContent = type.charAt(0).toUpperCase() + type.slice(1); // Judul sudah diatur
+
+        // Pastikan toast diinisialisasi dengan benar
+        let bsToast = bootstrap.Toast.getInstance(DOM.notificationToast);
+        if (!bsToast) {
+            bsToast = new bootstrap.Toast(DOM.notificationToast);
+        }
         bsToast.show();
     };
 
@@ -86,7 +95,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 btnElement.classList.remove('copy-success');
             }, 1500);
         } catch (err) {
-            showToast('Gagal menyalin teks: ' + err, 'error');
+            showToast('Gagal menyalin teks: ' + err.message, 'error');
         }
     };
 
@@ -98,12 +107,95 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     };
 
+    // --- Fungsi Notifikasi Baru ---
+    const loadNotifications = async () => {
+        try {
+            const response = await fetch('/notifications.json'); // Path ke file JSON notifikasi
+            if (!response.ok) throw new Error(`Gagal memuat notifikasi: ${response.status}`);
+            allNotifications = await response.json();
+            updateNotificationBadge();
+        } catch (error) {
+            console.error('Error loading notifications:', error);
+            // Tidak menampilkan toast error agar tidak mengganggu jika file tidak ada
+        }
+    };
+
+    const getSessionReadNotificationIds = () => {
+        const ids = sessionStorage.getItem('sessionReadNotificationIds');
+        return ids ? JSON.parse(ids) : [];
+    };
+
+    const addSessionReadNotificationId = (id) => {
+        let ids = getSessionReadNotificationIds();
+        if (!ids.includes(id)) {
+            ids.push(id);
+            sessionStorage.setItem('sessionReadNotificationIds', JSON.stringify(ids));
+        }
+    };
+    
+    const updateNotificationBadge = () => {
+        if (!DOM.notificationBadge || !allNotifications.length) {
+             if(DOM.notificationBadge) DOM.notificationBadge.classList.remove('active');
+            return;
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Set ke awal hari untuk perbandingan tanggal
+
+        const sessionReadIds = getSessionReadNotificationIds();
+
+        const unreadNotifications = allNotifications.filter(notif => {
+            const notificationDate = new Date(notif.date);
+            notificationDate.setHours(0, 0, 0, 0); // Set ke awal hari
+            // Notifikasi dianggap belum dibaca jika 'read' false di JSON, tanggalnya valid (hari ini atau lampau)
+            // DAN belum dibaca di sesi ini
+            return !notif.read && notificationDate <= today && !sessionReadIds.includes(notif.id);
+        });
+
+        if (unreadNotifications.length > 0) {
+            DOM.notificationBadge.classList.add('active');
+            // DOM.notificationBadge.textContent = unreadNotifications.length; // Tidak menampilkan angka
+            DOM.notificationBell.setAttribute('aria-label', `Notifikasi (${unreadNotifications.length} belum dibaca)`);
+        } else {
+            DOM.notificationBadge.classList.remove('active');
+            // DOM.notificationBadge.textContent = '';
+            DOM.notificationBell.setAttribute('aria-label', 'Tidak ada notifikasi baru');
+        }
+    };
+
+    const handleNotificationBellClick = () => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const sessionReadIds = getSessionReadNotificationIds();
+        // let newNotificationsDisplayed = false; // Variabel ini tidak digunakan
+
+        const notificationsToShow = allNotifications.filter(notif => {
+            const notificationDate = new Date(notif.date);
+            notificationDate.setHours(0, 0, 0, 0);
+            return !notif.read && notificationDate <= today && !sessionReadIds.includes(notif.id);
+        });
+
+        if (notificationsToShow.length > 0) {
+            notificationsToShow.forEach(notif => {
+                showToast(notif.message, 'notification', `Notifikasi (${new Date(notif.date).toLocaleDateString('id-ID')})`);
+                addSessionReadNotificationId(notif.id); // Tandai sebagai sudah dibaca di sesi ini
+                // newNotificationsDisplayed = true; // Variabel ini tidak digunakan
+            });
+        } else {
+            showToast('Tidak ada notifikasi baru saat ini.', 'info');
+        }
+        
+        updateNotificationBadge(); // Perbarui badge setelah notifikasi ditampilkan/dibaca
+    };
+
+
     // --- Inisialisasi dan Event Listener Utama ---
     const init = async () => {
         setupEventListeners();
         initTheme();
         initSideNav();
         initModal();
+        await loadNotifications(); // Muat notifikasi
         
         try {
             const response = await fetch('/src/settings.json');
@@ -128,6 +220,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (DOM.searchInput) DOM.searchInput.addEventListener('input', debounce(handleSearch, 300));
         if (DOM.clearSearchBtn) DOM.clearSearchBtn.addEventListener('click', clearSearch);
         
+        if (DOM.notificationBell) DOM.notificationBell.addEventListener('click', handleNotificationBellClick);
+
         // Delegasi event untuk tombol "GET" API
         if (DOM.apiContent) DOM.apiContent.addEventListener('click', handleApiGetButtonClick);
 
@@ -220,20 +314,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const handleScroll = () => {
         const scrollPosition = window.scrollY;
+        const headerElement = document.querySelector('.main-header'); // Select the header element
+        const headerHeight = headerElement ? parseInt(getComputedStyle(headerElement).height) : 70; // Ambil tinggi header dinamis
+        
         document.querySelectorAll('section[id]').forEach(section => {
-            const sectionTop = section.offsetTop - (DOM.headerHeight ? parseInt(getComputedStyle(DOM.headerHeight).height) : 80); // Perbaiki pengambilan tinggi header
+            const sectionTop = section.offsetTop - headerHeight - 20; // Penyesuaian offset
             const sectionHeight = section.offsetHeight;
             const sectionId = section.getAttribute('id');
             
             const navLink = document.querySelector(`.side-nav-link[href="#${sectionId}"]`);
             if (navLink) {
                 if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                    document.querySelectorAll('.side-nav-link').forEach(l => l.classList.remove('active'));
+                    document.querySelectorAll('.side-nav-link.active').forEach(l => {
+                        l.classList.remove('active');
+                        l.removeAttribute('aria-current');
+                    });
                     navLink.classList.add('active');
                     navLink.setAttribute('aria-current', 'page');
-                } else {
-                    navLink.classList.remove('active');
-                    navLink.removeAttribute('aria-current');
                 }
             }
         });
@@ -264,20 +361,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         setPageContent(DOM.pageTitle, settings.name, "Falcon API");
         setPageContent(DOM.wm, `© ${currentYear} ${creator}. Semua hak dilindungi.`);
-        // setPageContent(DOM.headerName, settings.name, "Skyzopedia UI"); // Perlu dicek ID 'header'
         setPageContent(DOM.appName, settings.name, "Falcon API");
         setPageContent(DOM.sideNavName, settings.name || "API");
         setPageContent(DOM.versionBadge, settings.version, "v1.0");
         setPageContent(DOM.versionHeaderBadge, settings.header?.status, "Aktif!");
         setPageContent(DOM.appDescription, settings.description, "Dokumentasi API simpel dan mudah digunakan.");
 
-        if (DOM.dynamicImage) {
-            DOM.dynamicImage.src = settings.bannerImage || '/src/banner.jpg'; // Fallback banner
+        // Jika .hero-visual dihilangkan, DOM.dynamicImage mungkin tidak ada lagi
+        if (DOM.dynamicImage && settings.bannerImage) {
+            DOM.dynamicImage.src = settings.bannerImage;
             DOM.dynamicImage.alt = settings.name ? `${settings.name} Banner` : "API Banner";
             DOM.dynamicImage.onerror = () => {
                 DOM.dynamicImage.src = '/src/banner.jpg'; // Fallback jika error
                 showToast('Gagal memuat gambar banner, menggunakan gambar default.', 'error');
             };
+        } else if (DOM.dynamicImage) {
+            // Sembunyikan elemen gambar jika tidak ada bannerImage atau elemennya sendiri tidak ada
+            DOM.dynamicImage.style.display = 'none'; 
         }
         
         // Mengisi tautan di hero section
@@ -346,19 +446,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const itemsRow = document.createElement('div');
-            itemsRow.className = 'row';
+            itemsRow.className = 'row'; // Ini adalah class Bootstrap row
             
             sortedItems.forEach((item, itemIndex) => {
                 const itemCol = document.createElement('div');
-                // Menggunakan class Bootstrap untuk kolom responsif
                 itemCol.className = 'col-12 col-md-6 col-lg-4 api-item'; 
                 itemCol.dataset.name = item.name;
                 itemCol.dataset.desc = item.desc;
                 itemCol.dataset.category = category.name;
                 itemCol.style.animationDelay = `${itemIndex * 0.05 + 0.2}s`;
 
-                const apiCard = document.createElement('article'); // Menggunakan article untuk setiap item API
-                apiCard.className = 'api-card h-100'; // h-100 untuk tinggi yang sama
+                const apiCard = document.createElement('article'); 
+                apiCard.className = 'api-card h-100'; 
                 apiCard.setAttribute('aria-labelledby', `api-title-${categoryIndex}-${itemIndex}`);
 
                 const cardInfo = document.createElement('div');
@@ -366,7 +465,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const itemTitle = document.createElement('h5');
                 itemTitle.id = `api-title-${categoryIndex}-${itemIndex}`;
-                itemTitle.className = 'mb-1'; // Mengurangi margin bawah
+                itemTitle.className = 'mb-1'; 
                 itemTitle.textContent = item.name;
                 
                 const itemDesc = document.createElement('p');
@@ -377,19 +476,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 cardInfo.appendChild(itemDesc);
                 
                 const actionsDiv = document.createElement('div');
-                actionsDiv.className = 'api-actions mt-auto'; // mt-auto untuk mendorong ke bawah
+                actionsDiv.className = 'api-actions mt-auto'; 
                 
                 const getBtn = document.createElement('button');
                 getBtn.type = 'button';
-                getBtn.className = 'btn get-api-btn btn-sm'; // btn-sm untuk ukuran lebih kecil
+                getBtn.className = 'btn get-api-btn btn-sm'; 
                 getBtn.innerHTML = '<i class="fas fa-code me-1" aria-hidden="true"></i> GET';
                 getBtn.dataset.apiPath = item.path;
                 getBtn.dataset.apiName = item.name;
                 getBtn.dataset.apiDesc = item.desc;
-                // Simpan data parameter jika ada
                 if (item.params) getBtn.dataset.apiParams = JSON.stringify(item.params);
                 if (item.innerDesc) getBtn.dataset.apiInnerDesc = item.innerDesc;
-
                 getBtn.setAttribute('aria-label', `Dapatkan detail untuk ${item.name}`);
                 
                 const status = item.status || "ready";
@@ -399,6 +496,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                     update: { class: "status-update", icon: "fa-arrow-up", text: "Update" }
                 };
                 const currentStatus = statusConfig[status] || statusConfig.ready;
+
+                // Menonaktifkan tombol dan menggelapkan kartu jika status 'error' atau 'update'
+                if (status === 'error' || status === 'update') {
+                    getBtn.disabled = true;
+                    apiCard.classList.add('api-card-unavailable');
+                    // Tambahkan tooltip untuk menjelaskan mengapa tombol dinonaktifkan
+                    getBtn.title = `API ini sedang dalam status '${status}', sementara tidak dapat digunakan.`;
+                }
+
 
                 const statusIndicator = document.createElement('div');
                 statusIndicator.className = `api-status ${currentStatus.class}`;
@@ -411,13 +517,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 apiCard.appendChild(cardInfo);
                 apiCard.appendChild(actionsDiv);
                 itemCol.appendChild(apiCard);
-                itemsRow.appendChild(itemCol);
+                itemsRow.appendChild(itemCol); 
             });
             
-            categorySection.appendChild(itemsRow);
+            categorySection.appendChild(itemsRow); 
             DOM.apiContent.appendChild(categorySection);
         });
-        initializeTooltips(); // Inisialisasi tooltip setelah elemen dibuat
+        initializeTooltips(); 
     };
 
     const displayErrorState = (message) => {
@@ -502,7 +608,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Penanganan Klik Tombol API ---
     const handleApiGetButtonClick = (event) => {
         const getApiBtn = event.target.closest('.get-api-btn');
-        if (!getApiBtn) return;
+        if (!getApiBtn || getApiBtn.disabled) return; // Jangan lakukan apa-apa jika tombol disabled
 
         getApiBtn.classList.add('pulse-animation');
         setTimeout(() => getApiBtn.classList.remove('pulse-animation'), 300);
@@ -678,8 +784,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         await handleApiRequest(apiUrlWithParams, currentApiData.name);
         
-        // Kembalikan tombol submit ke state awal setelah request selesai (baik sukses maupun gagal)
-        // Ini akan ditangani di dalam handleApiRequest bagian finally
     };
 
     const handleApiRequest = async (apiUrl, apiName) => {
@@ -768,12 +872,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } finally {
             DOM.modal.spinner.classList.add('d-none');
-            // Hanya reset tombol submit jika tidak ada parameter (karena request otomatis)
-            // atau jika ada error dan tombol retry tidak ada
-            if (!currentApiData || !currentApiData.path.split('?')[1] || (DOM.modal.content.querySelector('.error-container') && !DOM.modal.content.querySelector('.retry-query-btn'))) {
-                DOM.modal.submitBtn.disabled = !currentApiData || !currentApiData.path.split('?')[1]; // Nonaktifkan jika tidak ada parameter
-                DOM.modal.submitBtn.innerHTML = '<span>Kirim</span><i class="fas fa-paper-plane ms-2" aria-hidden="true"></i>';
-            }
+            if (DOM.modal.submitBtn) { 
+                const hasParams = currentApiData && currentApiData.path && currentApiData.path.includes('?');
+                const hasError = DOM.modal.content.querySelector('.error-container');
+                const hasRetryButton = DOM.modal.content.querySelector('.retry-query-btn');
+
+                if (!hasParams || (hasError && !hasRetryButton)) {
+                    DOM.modal.submitBtn.disabled = !hasParams; 
+                    DOM.modal.submitBtn.innerHTML = '<span>Kirim</span><i class="fas fa-paper-plane ms-2" aria-hidden="true"></i>';
+                }
+             }
         }
     };
     
@@ -798,7 +906,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let currentLevel = 0;
         let foldableHtml = '';
         let inFoldableBlock = false;
-        let blockStartIndex = -1;
+        // let blockStartIndex = -1; // Tidak digunakan
 
         lines.forEach((line, index) => {
             const trimmedLine = line.trim();
@@ -838,21 +946,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         const content = trigger.nextElementSibling;
         const isFolded = trigger.dataset.folded === 'true';
         const indicator = trigger.querySelector('.fold-indicator');
-        const icon = indicator.querySelector('i');
+        // const icon = indicator.querySelector('i'); // Icon akan diatur ulang sepenuhnya
 
         if (isFolded) { // Akan membuka
             content.style.maxHeight = content.scrollHeight + "px";
             trigger.dataset.folded = "false";
             trigger.setAttribute('aria-expanded', 'true');
             indicator.innerHTML = '(<i class="fas fa-chevron-up"></i> Tutup)';
-            icon.className = 'fas fa-chevron-up';
+            // icon.className = 'fas fa-chevron-up'; // Sudah diatur di innerHTML
 
         } else { // Akan melipat
             content.style.maxHeight = "0px";
             trigger.dataset.folded = "true";
             trigger.setAttribute('aria-expanded', 'false');
             indicator.innerHTML = '(<i class="fas fa-chevron-down"></i> Buka)';
-            icon.className = 'fas fa-chevron-down';
+            // icon.className = 'fas fa-chevron-down'; // Sudah diatur di innerHTML
         }
     };
     
@@ -875,7 +983,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Inisialisasi Tooltip ---
     const initializeTooltips = (parentElement = document) => {
         const tooltipTriggerList = [].slice.call(parentElement.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+        tooltipTriggerList.map(tooltipTriggerEl => {
+            // Hancurkan tooltip yang ada jika ada, untuk menghindari duplikasi atau error
+            const existingTooltip = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+            if (existingTooltip) {
+                existingTooltip.dispose();
+            }
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
     };
 
     // Jalankan inisialisasi utama

@@ -43,7 +43,7 @@
     --header-height: 70px;
     
     /* Background values for rgba */
-    --background-color-rgb: 248, 249, 253;
+    --background-color-rgb: 248, 249, 253; /* Light mode background RGB */
 }
 
 .dark-mode {
@@ -60,7 +60,7 @@
     --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     --hover-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
     --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    --background-color-rgb: 26, 27, 46;
+    --background-color-rgb: 26, 27, 46; /* Dark mode background RGB */
 }
 
 * {
@@ -461,55 +461,63 @@ a:hover {
     cursor: pointer;
     transition: var(--transition);
     border-radius: 50%;
+    background: none; /* Ensure no background by default */
+    border: none; /* Ensure no border by default */
 }
 .notification-bell:hover { color: var(--primary-color); background-color: var(--highlight-color); }
 
 .notification-badge {
     position: absolute;
-    top: 5px; /* Adjusted position */
-    right: 5px; /* Adjusted position */
-    width: 18px;
-    height: 18px;
+    top: 8px; /* Adjusted for better centering */
+    right: 8px; /* Adjusted for better centering */
+    width: 10px; /* Smaller circle */
+    height: 10px; /* Smaller circle */
     background-color: var(--error-color);
-    color: white;
-    font-size: 11px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     border-radius: 50%;
-    border: 1px solid var(--card-background); /* Add border to make it pop */
+    border: 1.5px solid var(--card-background); /* Border to make it pop */
+    display: none; /* Hidden by default, shown by JS */
+    /* Removed text properties as it's just a dot */
 }
+.notification-badge.active { /* Class to show the badge */
+    display: block;
+}
+
 
 /* Hero Section */
 .hero-section {
     display: flex;
     align-items: center;
-    padding: var(--space-xxl) var(--space-xl); /* Use variables */
+    /* Adjusted padding for a tighter look without background image */
+    padding: var(--space-xl) var(--space-lg); 
     position: relative;
     overflow: hidden;
-    min-height: calc(100vh - var(--header-height));
-    background: linear-gradient(135deg, rgba(var(--background-color-rgb),0.5), rgba(var(--background-color-rgb),1) 70%),
-                url('/src/icon.png') no-repeat center center / cover; /* Subtle background pattern */
-    background-blend-mode: overlay;
+    min-height: calc(80vh - var(--header-height)); /* Reduced min-height slightly */
+    /* Removed background image and gradient related to image */
+    background: linear-gradient(135deg, rgba(var(--background-color-rgb),0.85), rgba(var(--background-color-rgb),1) 80%);
+    /* background-blend-mode: normal; */ /* Reset blend mode if not needed */
 }
+
 .dark-mode .hero-section {
-    background: linear-gradient(135deg, rgba(var(--background-color-rgb),0.7), rgba(var(--background-color-rgb),1) 70%),
-                url('/src/icon.png') no-repeat center center / cover;
+    /* Removed background image and gradient related to image for dark mode */
+    background: linear-gradient(135deg, rgba(var(--background-color-rgb),0.9), rgba(var(--background-color-rgb),1) 80%);
 }
 
 
 .hero-content {
     flex: 1;
-    max-width: 650px; /* Slightly increased max-width */
+    max-width: 750px; /* Slightly increased max-width */
     animation: slideInLeft 0.8s ease-out;
     position: relative;
     z-index: 5;
+    /* Center content if hero-visual is completely removed or hidden */
+    margin: 0 auto; 
+    text-align: center; /* Center text if no visual element */
 }
 
 .hero-heading {
     display: flex;
     align-items: center;
+    justify-content: center; /* Center heading elements */
     flex-wrap: wrap;
     gap: var(--space-md);
     margin-bottom: var(--space-lg);
@@ -526,12 +534,16 @@ a:hover {
     color: var(--text-muted);
     margin-bottom: var(--space-xl);
     line-height: 1.7;
+    max-width: 600px; /* Limit width of description */
+    margin-left: auto; /* Center description */
+    margin-right: auto; /* Center description */
 }
 
 .hero-actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-md);
+    justify-content: center; /* Center action buttons */
 }
 
 .hero-actions a {
@@ -553,37 +565,11 @@ a:hover {
 .hero-actions a::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0)); transform: translateX(-100%); transition: 0.5s; }
 .hero-actions a:hover::before { transform: translateX(100%); }
 
-.hero-visual {
-    flex: 1;
-    position: relative;
-    height: 400px; /* Can be adjusted or made responsive */
-    animation: slideInRight 0.8s ease-out;
-    z-index: 2;
-    display: flex; /* For centering banner */
-    align-items: center;
-    justify-content: center;
+/* Hide hero-visual and shapes as background image is removed */
+.hero-visual, .shape {
+    display: none; 
 }
 
-.banner-container {
-    width: clamp(280px, 80%, 500px); /* Responsive width */
-    aspect-ratio: 16/9; /* Maintain aspect ratio */
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    transition: var(--transition);
-    transform: rotate(3deg);
-    position: relative;
-    z-index: 3;
-}
-.banner-container:hover { transform: rotate(0deg) translateY(-10px); box-shadow: var(--hover-shadow); }
-
-.banner { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
-.banner-container:hover .banner { transform: scale(1.05); }
-
-.shape { position: absolute; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); opacity: 0.1; animation: float 10s infinite alternate; }
-.shape-1 { width: 200px; height: 200px; top: -50px; right: 80px; animation-delay: 0s; }
-.shape-2 { width: 150px; height: 150px; bottom: 0; right: 20%; animation-delay: 2s; background: linear-gradient(135deg, var(--accent-color), var(--primary-color)); }
-.shape-3 { width: 80px; height: 80px; bottom: 30%; right: 10%; animation-delay: 4s; background: linear-gradient(135deg, var(--secondary-color), var(--accent-color)); }
 
 /* API Section */
 .api-section {
@@ -659,7 +645,6 @@ a:hover {
 
 .api-item.in-view { opacity: 1; transform: translateY(0); }
 
-/* Reusing .hero-section class for API item cards was confusing. Renaming to .api-card */
 .api-card {
     padding: var(--space-lg);
     background-color: var(--card-background);
@@ -679,6 +664,30 @@ a:hover {
 .api-card::after { content: ''; position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 50px 50px 0; border-color: transparent var(--highlight-color) transparent transparent; transition: var(--transition); opacity: 0; }
 .api-card:hover { box-shadow: var(--hover-shadow); transform: translateY(-5px); }
 .api-card:hover::after { opacity: 1; }
+
+/* Styling for unavailable API cards (status error or update) */
+.api-card.api-card-unavailable {
+    position: relative; /* Ensure positioning context for pseudo-element */
+}
+
+.api-card.api-card-unavailable::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.35); /* 35% black overlay */
+    border-radius: inherit; /* Match parent's border-radius */
+    z-index: 1; /* Overlay is above background but below content */
+    pointer-events: none; /* Allow clicks to pass through to content if any were interactive */
+}
+
+.api-card.api-card-unavailable > * { /* Ensure direct children are above the overlay */
+    position: relative;
+    z-index: 2;
+}
+
 
 .api-card-info { /* New container for title and desc */
     margin-bottom: var(--space-md);
@@ -727,6 +736,20 @@ a:hover {
 .get-api-btn::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0)); transform: translateX(-100%); transition: 0.5s; }
 .get-api-btn:hover { transform: translateY(-3px); box-shadow: var(--hover-shadow); }
 .get-api-btn:hover::before { transform: translateX(100%); }
+
+/* Styles for disabled GET button due to API status */
+.get-api-btn[disabled] {
+    background: var(--text-muted) !important; /* More prominent disabled background */
+    color: var(--background-color) !important; /* Ensure text is readable */
+    opacity: 0.65 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+.get-api-btn[disabled]::before { /* Disable hover animation on disabled button */
+    display: none !important;
+}
+
 
 .api-status {
     display: inline-flex; /* Changed to inline-flex */
@@ -855,11 +878,19 @@ input:checked + .slider:before { transform: translateX(26px); }
 
 /* Responsive Styles */
 @media (max-width: 1200px) {
-    .hero-section { flex-direction: column; text-align: center; padding: var(--space-xl) var(--space-lg); }
-    .hero-content { max-width: 100%; margin-bottom: var(--space-xl); align-items: center; }
+    .hero-section { 
+        /* flex-direction: column; Already handled by content centering */
+        text-align: center; 
+        padding: var(--space-xl) var(--space-lg); 
+    }
+    .hero-content { 
+        max-width: 100%; 
+        margin-bottom: var(--space-xl); 
+        /* align-items: center; Already handled by text-align and margin auto */
+    }
     .hero-heading { justify-content: center; }
     .hero-actions { justify-content: center; }
-    .hero-visual { width: 100%; max-width: 500px; /* Limit banner size on smaller large screens */ }
+    /* .hero-visual is already display: none */
 }
 
 @media (max-width: 992px) {
@@ -892,9 +923,7 @@ input:checked + .slider:before { transform: translateX(26px); }
     .section-title { font-size: 1.8rem; }
     .section-description { font-size: 0.95rem; }
     .get-api-btn { padding: 0.6rem 1rem; font-size: 0.85rem; }
-    /* .api-card > div { width: 100%; } */ /* This was problematic, removed */
-    .api-actions { /* width: 100%; */ /* This was problematic, removed */ flex-direction: row; justify-content: space-between; margin-top: var(--space-sm); }
-    /* .api-card { flex-direction: column; padding: var(--space-md); } */ /* This was problematic, removed */
+    .api-actions { flex-direction: row; justify-content: space-between; margin-top: var(--space-sm); }
     .toast-container { left: var(--space-md); right: var(--space-md); bottom: var(--space-md); }
     .toast { min-width: unset; width: calc(100% - (var(--space-md) * 2)); }
     .modal-body { max-height: 65vh; }

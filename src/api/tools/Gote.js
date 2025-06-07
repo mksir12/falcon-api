@@ -7,7 +7,7 @@ module.exports = function (app) {
     if (!url) {
       return res.status(400).json({
         status: false,
-        message: "Parameter 'url' wajib diisi (link gambar)."
+        message: "Parameter 'url' wajib diisi (link gambar)"
       });
     }
 
@@ -18,14 +18,12 @@ module.exports = function (app) {
         {
           headers: {
             "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0",
-            "referer": "https://huggingface.co",
-            "origin": "https://huggingface.co"
+            Authorization: "Bearer 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",
+            "User-Agent": "Mozilla/5.0"
           }
         }
       );
 
-      // Ambil label dengan confidence tertinggi
       const top = data.sort((a, b) => b.score - a.score)[0];
 
       res.json({
@@ -40,6 +38,7 @@ module.exports = function (app) {
     } catch (e) {
       res.status(500).json({
         status: false,
+        creator: "FlowFalcon",
         message: "Gagal mengecek konten gore",
         error: e.response?.data || e.message
       });

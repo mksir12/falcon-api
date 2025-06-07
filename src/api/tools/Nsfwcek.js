@@ -13,11 +13,9 @@ module.exports = function (app) {
     }
 
     try {
-      // Step 1: Download gambar dari URL user
       const imageRes = await axios.get(url, { responseType: "arraybuffer" });
       const buffer = Buffer.from(imageRes.data);
 
-      // Step 2: Upload via form ke nsfw-categorize
       const form = new FormData();
       form.append("image", buffer, {
         filename: "image.jpg",
@@ -28,12 +26,19 @@ module.exports = function (app) {
         headers: {
           ...form.getHeaders(),
           accept: "application/json",
-          "x-requested-with": "XMLHttpRequest"
+          "x-requested-with": "XMLHttpRequest",
+          // Reset sesi
+          "cookie": "",
+          "user-agent": `Mozilla/5.0 (Linux; Android 10; ID/${Math.random().toString(36).slice(2, 10)})`
         }
       });
 
+      // Hapus quota dari hasil akhir
+      if (data?.quota) delete data.quota;
+
       res.json({
         status: true,
+        creator: "FlowFalcon",
         result: data
       });
     } catch (err) {

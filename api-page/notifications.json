@@ -1,8 +1,15 @@
 [
   {
     "id": "#02",
-    "date": "2025-06-1",
+    "date": "2025-06-01",
     "title": "Update Tampilan API!", 
     "message": "Sekarang ada update baru dari API, Silahkan cek informasinya di saluran WhatsApp kami"
+  },
+  
+  {
+    "id": "#03",
+    "date": "2025-06-08",
+    "title": "Update Endpoint API!", 
+    "message": "API kami sudah memiliki banyak update endpoint, silahkan di lihat dan jangan lupa cek infonya di whatsapp channel kami"
   }
 ]

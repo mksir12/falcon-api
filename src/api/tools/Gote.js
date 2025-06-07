@@ -13,7 +13,7 @@ module.exports = function (app) {
 
     try {
       const { data } = await axios.post(
-        "https://api-inference.huggingface.co/models/akhaliq/NSFW_Gore_Image_Detector",
+        "https://api-inference.huggingface.co/models/Falconsai/nsfw_image_detection",
         { inputs: url },
         {
           headers: {
@@ -31,7 +31,7 @@ module.exports = function (app) {
         creator: "FlowFalcon",
         result: {
           label: top.label,
-          confidence: +(top.score * 100).toFixed(2) + "%",
+          confidence: `${(top.score * 100).toFixed(2)}%`,
           raw: data
         }
       });
@@ -39,7 +39,7 @@ module.exports = function (app) {
       res.status(500).json({
         status: false,
         creator: "FlowFalcon",
-        message: "Gagal mengecek konten gore",
+        message: "Gagal mengecek konten NSFW",
         error: e.response?.data || e.message
       });
     }

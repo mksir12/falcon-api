@@ -71,7 +71,6 @@ class APIDocumentation {
             
             // Initialize components
             this.initializeSearch();
-            this.initializeNavigation();
             this.initializeModal();
             
             // Render content
@@ -116,8 +115,10 @@ class APIDocumentation {
     }
     
     updateThemeIcon(icon) {
-        const slider = this.elements.themeToggle.querySelector('.theme-toggle-slider');
-        slider.innerHTML = `<i class="fas fa-${icon}"></i>`;
+        const slider = this.elements.themeToggle?.querySelector('.theme-toggle-slider');
+        if (slider) {
+            slider.innerHTML = `<i class="fas fa-${icon}"></i>`;
+        }
     }
     
     // Data Loading
@@ -197,7 +198,11 @@ class APIDocumentation {
         
         // Search
         this.elements.searchInput?.addEventListener('input', (e) => this.handleSearch(e.target.value));
-        this.elements.searchInput?.addEventListener('focus', () => this.showSearchSuggestions());
+        this.elements.searchInput?.addEventListener('focus', () => {
+            if (this.elements.searchInput.value.trim()) {
+                this.showSearchSuggestions();
+            }
+        });
         this.elements.clearSearch?.addEventListener('click', () => this.clearSearch());
         
         // Keyboard shortcuts
@@ -274,10 +279,12 @@ class APIDocumentation {
     
     // Search Functionality
     initializeSearch() {
-        // Show/hide clear button
-        this.elements.searchInput?.addEventListener('input', (e) => {
-            this.elements.clearSearch.classList.toggle('visible', e.target.value.length > 0);
-        });
+        // Show/hide clear button based on input
+        if (this.elements.searchInput && this.elements.clearSearch) {
+            // Event listener sudah ditambahkan di setupEventListeners
+            // Hanya perlu initial state
+            this.elements.clearSearch.classList.remove('visible');
+        }
     }
     
     handleSearch(query) {
@@ -361,7 +368,12 @@ class APIDocumentation {
     
     // Category and API Rendering
     renderCategories() {
-        if (!this.settings.categories?.length) return;
+        if (!this.elements.categoryTabs) return;
+        
+        if (!this.settings.categories?.length) {
+            this.elements.categoryTabs.innerHTML = '<p class="text-muted">No categories available</p>';
+            return;
+        }
         
         const allTab = `
             <button class="category-tab active" data-category="all">
@@ -399,6 +411,8 @@ class APIDocumentation {
     }
     
     renderAPIs() {
+        if (!this.elements.apiGrid) return;
+        
         const apis = this.getFilteredAPIs();
         
         if (!apis.length) {
@@ -417,7 +431,13 @@ class APIDocumentation {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const card = e.target.closest('.api-card');
-                this.openAPIModal(JSON.parse(card.dataset.api));
+                const apiData = card.dataset.api;
+                try {
+                    this.openAPIModal(JSON.parse(apiData));
+                } catch (error) {
+                    console.error('Error parsing API data:', error);
+                    this.showToast('Error loading API details', 'error');
+                }
             });
         });
     }
@@ -995,6 +1015,8 @@ class APIDocumentation {
     
     // Loading Screen
     hideLoading() {
+        if (!this.elements.loadingScreen) return;
+        
         setTimeout(() => {
             this.elements.loadingScreen.style.opacity = '0';
             setTimeout(() => {

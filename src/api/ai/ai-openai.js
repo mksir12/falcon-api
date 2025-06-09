@@ -37,14 +37,13 @@ module.exports = function (app) {
       res.json({
         status: true,
         creator: "FlowFalcon",
-        result: data
+        result: data?.response_content || "-"
       });
     } catch (err) {
-      const detail = err.response?.data || err.message;
       res.status(500).json({
         status: false,
         message: "Gagal mengambil respons dari WriteCream AI.",
-        error: detail
+        error: err.response?.data || err.message
       });
     }
   });

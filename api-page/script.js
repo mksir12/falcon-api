@@ -88,175 +88,6 @@ class APIDocumentation {
             this.hideLoading();
             
         } catch (error) {
-            console.error('Failed to load notifications:', error);
-        }
-    }
-    
-    updateNotificationBadge() {
-        const unreadCount = this.notifications.filter(n => !n.read).length;
-        if (unreadCount > 0) {
-            this.elements.notificationBadge.classList.add('active');
-        } else {
-            this.elements.notificationBadge.classList.remove('active');
-        }
-    }
-    
-    showNotifications() {
-        const unreadNotifications = this.notifications.filter(n => !n.read);
-        
-        if (unreadNotifications.length === 0) {
-            this.showToast('No new notifications', 'info');
-            return;
-        }
-        
-        unreadNotifications.forEach(notification => {
-            this.showToast(notification.message, 'notification', notification.title);
-            notification.read = true;
-        });
-        
-        this.updateNotificationBadge();
-    }
-    
-    // Toast Notifications
-    showToast(message, type = 'info', title = '') {
-        const toastId = `toast-${Date.now()}`;
-        const iconMap = {
-            success: 'fa-check-circle',
-            error: 'fa-exclamation-circle',
-            warning: 'fa-exclamation-triangle',
-            info: 'fa-info-circle',
-            notification: 'fa-bell'
-        };
-        
-        const toastHTML = `
-            <div class="toast ${type}" id="${toastId}">
-                <i class="fas ${iconMap[type] || iconMap.info} toast-icon"></i>
-                <div class="toast-content">
-                    ${title ? `<div class="toast-title">${title}</div>` : ''}
-                    <div class="toast-message">${message}</div>
-                </div>
-                <button class="toast-close" onclick="document.getElementById('${toastId}').remove()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        `;
-        
-        this.elements.toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-        
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            const toast = document.getElementById(toastId);
-            if (toast) {
-                toast.style.animation = 'slideOutRight 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }
-        }, 5000);
-    }
-    
-    // Keyboard Shortcuts
-    handleKeyboardShortcuts(e) {
-        // Ctrl/Cmd + K for search
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-            e.preventDefault();
-            this.elements.searchInput?.focus();
-        }
-        
-        // Escape to close modal
-        if (e.key === 'Escape') {
-            if (this.elements.apiModal.classList.contains('show')) {
-                this.closeModal();
-            } else if (this.elements.searchSuggestions.classList.contains('show')) {
-                this.hideSearchSuggestions();
-            }
-        }
-    }
-    
-    // Click Outside Handlers
-    handleClickOutside(e) {
-        // Close search suggestions
-        if (!e.target.closest('.search-container')) {
-            this.hideSearchSuggestions();
-        }
-        
-        // Close mobile nav
-        if (window.innerWidth < 992 && 
-            !e.target.closest('.side-nav') && 
-            !e.target.closest('.menu-toggle') &&
-            this.elements.sideNav.classList.contains('active')) {
-            this.elements.sideNav.classList.remove('active');
-        }
-    }
-    
-    // Scroll Handling
-    handleScroll() {
-        const scrolled = window.scrollY > 50;
-        this.elements.mainHeader?.classList.toggle('scrolled', scrolled);
-        
-        // Update active section in navigation
-        this.updateActiveSection();
-    }
-    
-    updateActiveSection() {
-        const sections = document.querySelectorAll('section[id]');
-        const scrollPosition = window.scrollY + 100;
-        
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.offsetHeight;
-            const sectionId = section.getAttribute('id');
-            
-            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                document.querySelectorAll('.side-nav-link').forEach(link => {
-                    link.classList.toggle('active', link.getAttribute('href') === `#${sectionId}`);
-                });
-            }
-        });
-    }
-    
-    // Scroll Animations
-    setupScrollAnimations() {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, {
-            threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
-        });
-        
-        document.querySelectorAll('.reveal').forEach(element => {
-            observer.observe(element);
-        });
-    }
-    
-    // Loading Screen
-    hideLoading() {
-        setTimeout(() => {
-            this.elements.loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                this.elements.loadingScreen.style.display = 'none';
-                document.body.classList.remove('no-scroll');
-            }, 300);
-        }, 500);
-    }
-}
-
-// Initialize the application when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    window.apiDocs = new APIDocumentation();
-});
-
-// Service Worker Registration (for PWA support)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {
-            // Service worker registration failed, app will still work
-        });
-    });
-}
             console.error('Initialization error:', error);
             this.showToast('Failed to initialize application', 'error');
         }
@@ -1018,3 +849,172 @@ if ('serviceWorker' in navigator) {
                 this.updateNotificationBadge();
             }
         } catch (error) {
+            console.error('Failed to load notifications:', error);
+        }
+    }
+    
+    updateNotificationBadge() {
+        const unreadCount = this.notifications.filter(n => !n.read).length;
+        if (unreadCount > 0) {
+            this.elements.notificationBadge.classList.add('active');
+        } else {
+            this.elements.notificationBadge.classList.remove('active');
+        }
+    }
+    
+    showNotifications() {
+        const unreadNotifications = this.notifications.filter(n => !n.read);
+        
+        if (unreadNotifications.length === 0) {
+            this.showToast('No new notifications', 'info');
+            return;
+        }
+        
+        unreadNotifications.forEach(notification => {
+            this.showToast(notification.message, 'notification', notification.title);
+            notification.read = true;
+        });
+        
+        this.updateNotificationBadge();
+    }
+    
+    // Toast Notifications
+    showToast(message, type = 'info', title = '') {
+        const toastId = `toast-${Date.now()}`;
+        const iconMap = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle',
+            notification: 'fa-bell'
+        };
+        
+        const toastHTML = `
+            <div class="toast ${type}" id="${toastId}">
+                <i class="fas ${iconMap[type] || iconMap.info} toast-icon"></i>
+                <div class="toast-content">
+                    ${title ? `<div class="toast-title">${title}</div>` : ''}
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="document.getElementById('${toastId}').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        
+        this.elements.toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 5000);
+    }
+    
+    // Keyboard Shortcuts
+    handleKeyboardShortcuts(e) {
+        // Ctrl/Cmd + K for search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            this.elements.searchInput?.focus();
+        }
+        
+        // Escape to close modal
+        if (e.key === 'Escape') {
+            if (this.elements.apiModal.classList.contains('show')) {
+                this.closeModal();
+            } else if (this.elements.searchSuggestions.classList.contains('show')) {
+                this.hideSearchSuggestions();
+            }
+        }
+    }
+    
+    // Click Outside Handlers
+    handleClickOutside(e) {
+        // Close search suggestions
+        if (!e.target.closest('.search-container')) {
+            this.hideSearchSuggestions();
+        }
+        
+        // Close mobile nav
+        if (window.innerWidth < 992 && 
+            !e.target.closest('.side-nav') && 
+            !e.target.closest('.menu-toggle') &&
+            this.elements.sideNav.classList.contains('active')) {
+            this.elements.sideNav.classList.remove('active');
+        }
+    }
+    
+    // Scroll Handling
+    handleScroll() {
+        const scrolled = window.scrollY > 50;
+        this.elements.mainHeader?.classList.toggle('scrolled', scrolled);
+        
+        // Update active section in navigation
+        this.updateActiveSection();
+    }
+    
+    updateActiveSection() {
+        const sections = document.querySelectorAll('section[id]');
+        const scrollPosition = window.scrollY + 100;
+        
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.offsetHeight;
+            const sectionId = section.getAttribute('id');
+            
+            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                document.querySelectorAll('.side-nav-link').forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === `#${sectionId}`);
+                });
+            }
+        });
+    }
+    
+    // Scroll Animations
+    setupScrollAnimations() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        });
+        
+        document.querySelectorAll('.reveal').forEach(element => {
+            observer.observe(element);
+        });
+    }
+    
+    // Loading Screen
+    hideLoading() {
+        setTimeout(() => {
+            this.elements.loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                this.elements.loadingScreen.style.display = 'none';
+                document.body.classList.remove('no-scroll');
+            }, 300);
+        }, 500);
+    }
+}
+
+// Initialize the application when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.apiDocs = new APIDocumentation();
+});
+
+// Service Worker Registration (for PWA support)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {
+            // Service worker registration failed, app will still work
+        });
+    });
+}

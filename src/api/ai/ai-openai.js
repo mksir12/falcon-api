@@ -1,61 +1,86 @@
-const axios = require('axios');
-const Groq = require('groq-sdk');
+const fetch = require("node-fetch");
+const { randomUUID } = require("crypto");
 
-module.exports = function(app) {
-    let api = [
-"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", 
-"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", 
-"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", 
-"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"
-]
+module.exports = function (app) {
+  app.get("/ai/openai", async (req, res) => {
+    const { text } = req.query;
 
-let apikey = api[Math.floor(Math.random() * api.length)]
+    if (!q) {
+      return res.status(400).json({
+        status: false,
+        message: "Parameter 'text' wajib diisi untuk mengirim pertanyaan."
+      });
+    }
 
-const client = new Groq({
-  apiKey: apikey,
-});
+    const headers = {
+      "accept": "*/*",
+      "content-type": "application/json",
+      "x-device-language": "id",
+      "x-device-platform": "web",
+      "x-device-uuid": randomUUID(),
+      "x-device-version": "1.1.11",
+      "referer": "https://amigochat.io/"
+    };
 
-async function groq(teks, prompt = `sekarang kamu adalah ai yang siap membantu & menjawab pertanyaan dan selalu gunakan bahasa Indonesia saat menjawab`) {
-try {
-  const chatCompletion = await client.chat.completions
-    .create({
+    const payload = {
+      model: "gpt-4.1-2025-04-14",
       messages: [
-        { role: 'system', content: prompt },
-        { role: 'user', content: teks }
+        {
+          role: "system",
+          content: "Kamu adalah asisten pintar bernama FlowFalcon AI. Kamu biasa dipanggil FlowAI atau FalconAI. Kamu mahir beragam bahasa tetapi bahasa utama kamu adalah bahasa Indonesia dan bahasa Inggris. Lebih gunakan 'Aku-Kamu' ketimbang 'Saya-Anda'. Respon kamu asik dan menyenangkan, tetapi juga bisa serius, jadi kamu fleksibel bisa menyenangkan, asik, sekaligus serius supaya tak membosankan. Kamu juga suka merespon menggunakan emoji, tetapi jangan berlebihan dan gunakan seperlunya saja biar tak membuat lawan bicara kamu risih. Jadilah AI yang smart, seru, lucu, dan tidak membosankan hihi."
+        },
+        { role: "user", content: q }
       ],
-      model: 'llama3-8b-8192',
-    })
-    .catch(async (err) => {
-      if (err instanceof Groq.APIError) {
-        console.log(err.status);
-        console.log(err.name);
-        console.log(err.headers);
-      } else {
-        throw err;
-      }
-    })
-    
-    return chatCompletion.choices[0].message.content
-  
-  } catch (e) {
-  console.log(e)
-  }
-}
+      personaId: "amigo",
+      frequency_penalty: 0,
+      max_tokens: 2048,
+      presence_penalty: 0,
+      stream: false,
+      temperature: 0.5,
+      top_p: 0.95
+    };
 
-app.get('/ai/openai', async (req, res) => {
+    try {
+      const response = await fetch("https://api.amigochat.io/v1/chat/completions", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload)
+      });
+
+      const raw = await response.text();
+      const lines = raw.split("\n").filter(line => line.startsWith("data:"));
+      const result = [];
+
+      for (const line of lines) {
+        const json = line.replace("data: ", "").trim();
+        if (json === "[DONE]") break;
+
         try {
-            const { text } = req.query;
-            if (!text) {
-                return res.status(400).json({ status: false, error: 'Text is required' });
-            }
-            const result = await groq(text);
-            res.status(200).json({
-                status: true,
-                result: result
-            });
-        } catch (error) {
-            res.status(500).json({ status: false, error: error.message });
-        }
-    });
-    
-}
+          const parsed = JSON.parse(json);
+          const isi = parsed.choices?.[0]?.delta?.content || parsed.choices?.[0]?.message?.content;
+          if (isi) result.push(isi);
+        } catch {}
+      }
+
+      const finalResponse = result.join("").trim();
+      if (!finalResponse) {
+        return res.status(500).json({
+          status: false,
+          message: "Tidak ada balasan dari AI."
+        });
+      }
+
+      res.json({
+        status: true,
+        creator: "FlowFalcon",
+        result: finalResponse
+      });
+    } catch (err) {
+      res.status(500).json({
+        status: false,
+        message: "Gagal menghubungi AI.",
+        error: err.message || err
+      });
+    }
+  });
+};

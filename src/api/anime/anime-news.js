@@ -11,7 +11,7 @@ module.exports = function (app) {
       $(".news-unit.clearfix.rect").each((_, element) => {
         const title = $(element).find(".title a").text().trim();
         const rawLink = $(element).find(".title a").attr("href");
-        const image = $(element).find(".image-link img").attr("src");
+        const image = $('.content > div > img.userimg').attr('src');
         const date = $(element).find(".info.di-ib").text().split("by")[0].trim();
 
         const id = rawLink?.split("/news/")[1]?.split("/")[0];

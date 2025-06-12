@@ -1,38 +1,40 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
-
-async function animeNews() {
-  try {
-    const res = await axios.get("https://www.kaorinusantara.or.id/rubrik/aktual/anime");
-    const $ = cheerio.load(res.data);
-    const news = [];
-
-    $(".td_module_10.td_module_wrap.td-animation-stack").each((i, el) => {
-      const judul = $(el).find("h3").text().trim();
-      const link = $(el).find("h3 a").attr("href");
-      news.push({ judul, link });
-    });
-
-    return news;
-  } catch (err) {
-    return { error: err.message };
-  }
-}
+const axios = require('axios');
+const cheerio = require('cheerio');
 
 module.exports = function (app) {
   app.get("/anime/beritaanime", async (req, res) => {
-    const result = await animeNews();
-    if (Array.isArray(result)) {
+    const url = 'https://www.kaorinusantara.or.id/rubrik/aktual/anime';
+
+    try {
+      const response = await axios.get(url);
+      const $ = cheerio.load(response.data);
+      const results = [];
+
+      $('.td_module_wrap.td-animation-stack').each((i, el) => {
+        const title = $(el).find('.entry-title').text().trim();
+        const link = $(el).find('.entry-title a').attr('href');
+        const date = $(el).find('.entry-date').text().trim();
+
+        const imgEl = $(el).find('img');
+        const image = imgEl.attr('src') || 
+                      imgEl.attr('data-src') || 
+                      imgEl.attr('data-lazy-src') || 
+                      imgEl.attr('data-img-url') || 
+                      'No Image';
+
+        results.push({ title, image, date, url: link });
+      });
+
       res.json({
         status: true,
-        total: result.length,
-        result
+        creator: "FlowFalcon",
+        result: results
       });
-    } else {
+    } catch (err) {
       res.status(500).json({
         status: false,
-        msg: "Gagal ngambil berita",
-        error: result.error
+        message: "Gagal mengambil berita anime.",
+        error: err.message
       });
     }
   });

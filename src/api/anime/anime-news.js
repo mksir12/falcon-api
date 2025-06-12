@@ -2,7 +2,7 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 
 module.exports = function (app) {
-  app.get("/anime/beritaanime", async (req, res) => {
+  app.get("/anime/beritanaime", async (req, res) => {
     try {
       const response = await axios.get("https://myanimelist.net/news");
       const $ = cheerio.load(response.data);
@@ -11,11 +11,11 @@ module.exports = function (app) {
       $(".news-unit.clearfix.rect").each((_, element) => {
         const title = $(element).find(".title a").text().trim();
         const rawLink = $(element).find(".title a").attr("href");
-        const image = $('.content > div > img.userimg').attr('src');
+        const image = $(element).find(".image-link img").attr("src");
         const date = $(element).find(".info.di-ib").text().split("by")[0].trim();
 
         const id = rawLink?.split("/news/")[1]?.split("/")[0];
-        const localLink = id ? `https://flowfalcon.dpdns.org/anime/berita?id=${id}` : null;
+        const localLink = id ? `/anime/berita?id=${id}` : null;
 
         if (title && localLink) {
           newsData.push({

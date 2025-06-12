@@ -15,7 +15,7 @@ module.exports = function (app) {
         const date = $(element).find(".info.di-ib").text().split("by")[0].trim();
 
         const id = rawLink?.split("/news/")[1]?.split("/")[0];
-        const localLink = id ? `/anime/berita?id=${id}` : null;
+        const localLink = id ? `https://flowfalcon.dpdns.org/anime/berita?id=${id}` : null;
 
         if (title && localLink) {
           newsData.push({

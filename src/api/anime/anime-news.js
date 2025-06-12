@@ -1,39 +1,41 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+const axios = require("axios");
+const cheerio = require("cheerio");
 
 module.exports = function (app) {
-  app.get("/anime/beritaanime", async (req, res) => {
-    const url = 'https://www.kaorinusantara.or.id/rubrik/aktual/anime';
-
+  app.get("/anime/beritanaime", async (req, res) => {
     try {
-      const response = await axios.get(url);
+      const response = await axios.get("https://myanimelist.net/news");
       const $ = cheerio.load(response.data);
-      const results = [];
+      const newsData = [];
 
-      $('.td_module_wrap.td-animation-stack').each((i, el) => {
-        const title = $(el).find('.entry-title').text().trim();
-        const link = $(el).find('.entry-title a').attr('href');
-        const date = $(el).find('.entry-date').text().trim();
+      $(".news-unit.clearfix.rect").each((_, element) => {
+        const title = $(element).find(".title a").text().trim();
+        const rawLink = $(element).find(".title a").attr("href");
+        const image = $(element).find(".image-link img").attr("src");
+        const date = $(element).find(".info.di-ib").text().split("by")[0].trim();
 
-        const imgEl = $(el).find('img');
-        const image = imgEl.attr('src') || 
-                      imgEl.attr('data-src') || 
-                      imgEl.attr('data-lazy-src') || 
-                      imgEl.attr('data-img-url') || 
-                      'No Image';
+        const id = rawLink?.split("/news/")[1]?.split("/")[0];
+        const localLink = id ? `https://flowfalcon.dpdns.org/anime/berita?id=${id}` : null;
 
-        results.push({ title, image, date, url: link });
+        if (title && localLink) {
+          newsData.push({
+            title,
+            link: localLink,
+            image,
+            date
+          });
+        }
       });
 
       res.json({
         status: true,
         creator: "FlowFalcon",
-        result: results
+        result: newsData
       });
     } catch (err) {
       res.status(500).json({
         status: false,
-        message: "Gagal mengambil berita anime.",
+        message: "Gagal mengambil data berita anime.",
         error: err.message
       });
     }

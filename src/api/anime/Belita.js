@@ -20,7 +20,7 @@ module.exports = function (app) {
 
       const title = $("h1.title").text().trim();
       const date = $(".news-info-block .information").text().split('|')[0].replace('by', '').trim();
-      const image = $(".content.clearfix > img").attr("src") || null;
+      const image = $('.content > div > img.userimg').attr('src') || null;
       const content = $(".content").text().trim();
 
       return res.json({

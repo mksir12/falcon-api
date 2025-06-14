@@ -14,25 +14,27 @@ module.exports = function (app) {
         z: 100
       },
       mobile: {
-        w: 400,
-        h: 800,
-        s: 100,
-        z: 100
-      }
+  w: 375,
+  h: 812,
+  s: 100,
+  z: 100,
+  ua: encodeURIComponent("Mozilla/5.0 (iPhone; CPU iPhone OS 13_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Mobile/15E148 Safari/604.1")
+}
     };
 
     const getScreenshot = async (device) => {
-      const { w, h, s, z } = config[device];
-      const endpoint = `https://api.pikwy.com/?tkn=125&d=3000&u=${encodeURIComponent(url)}&fs=0&w=${w}&h=${h}&s=${s}&z=${z}&f=$jpg&rt=jweb`;
+  const { w, h, s, z, ua } = config[device];
+  let endpoint = `https://api.pikwy.com/?tkn=125&d=3000&u=${encodeURIComponent(url)}&fs=0&w=${w}&h=${h}&s=${s}&z=${z}&f=$jpg&rt=jweb`;
 
-      try {
-        const result = await axios.get(endpoint);
-        return result.data.iurl;
-      } catch (err) {
-        throw new Error('Gagal mengambil screenshot.');
-      }
-    };
+  if (ua) endpoint += `&useragent=${ua}`;
 
+  try {
+    const result = await axios.get(endpoint);
+    return result.data.iurl;
+  } catch (err) {
+    throw new Error('Gagal mengambil screenshot.');
+  }
+};
     try {
       // Jika request langsung gambar
       if (mode === 'pc' || mode === 'mobile') {

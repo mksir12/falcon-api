@@ -14,7 +14,9 @@ module.exports = function (app) {
         const animeEl = $(el).find("a");
         const href = animeEl.attr("href");
         const link = href.startsWith("http") ? href : baseUrl + href;
-
+        let episode = $(el).find('.text-gray-400 > span').text().replace('Eps ', '');
+        episode = episode === '' ? '0' : episode;
+    
         const rawImage = animeEl.find("img").attr("src");
         const imageParams = new URLSearchParams(rawImage.split("?")[1]);
         const image = imageParams.get("url")
@@ -23,7 +25,7 @@ module.exports = function (app) {
 
         const title = animeEl.find("h3").text().trim();
 
-        lastUpdateAnime.push({ title, image, link });
+        lastUpdateAnime.push({ title, episode, image, link });
       });
 
       res.json({

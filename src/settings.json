@@ -90,6 +90,17 @@
                         "text": "Teks atau pertanyaan untuk AI.",
                         "model": "Nama model dari HydroMind yang ingin digunakan."
                     }
+                },
+                {
+                    "name": "Deep Image AI",
+                    "desc": "Membuat gambar dari teks menggunakan model DeepImg. Tersedia beberapa pilihan gaya.",
+                    "path": "/ai/deepimg?prompt=&size=&style=",
+                    "status": "ready",
+                    "params": {
+                        "prompt": "Deskripsi gambar yang ingin dibuat.",
+                        "size": "(Opsional) Ukuran gambar. Pilihan: '1:1', '3:2', '2:3'. Default: '3:2'.",
+                        "style": "(Opsional) Gaya gambar. Pilihan: 'default', 'ghibli', 'cyberpunk', 'anime', 'portrait', 'chibi', 'pixel art', 'oil painting', '3d'. Default: '3d'."
+                    }
                 }
             ]
         },
@@ -98,8 +109,29 @@
             "items": [
                 {
                     "name": "Berita Anime",
-                    "desc": "Menarik berita anime terbaru dari situs Kaori Nusantara.",
+                    "desc": "Menarik daftar berita anime terbaru dari MyAnimeList.",
                     "path": "/anime/beritaanime",
+                    "status": "ready"
+                },
+                {
+                    "name": "Detail Berita Anime",
+                    "desc": "Mengambil konten lengkap dari sebuah berita anime berdasarkan ID-nya.",
+                    "path": "/anime/berita?id=",
+                    "status": "ready",
+                    "params": {
+                        "id": "ID berita yang didapat dari endpoint 'Berita Anime'."
+                    }
+                },
+                {
+                    "name": "Update Anime Revinime",
+                    "desc": "Menampilkan daftar anime dengan episode yang baru saja di-update di Revinime.",
+                    "path": "/anime/revinime",
+                    "status": "ready"
+                },
+                {
+                    "name": "Jadwal Rilis Anime",
+                    "desc": "Menampilkan jadwal rilis anime mingguan dari LiveChart.me.",
+                    "path": "/anime/jadwalrilis",
                     "status": "ready"
                 },
                 {
@@ -525,7 +557,7 @@
                     "name": "Lyrics Search",
                     "desc": "Mencari lirik lagu berdasarkan judulnya.",
                     "path": "/search/lyrics?q=",
-                    "status": "ready",
+                    "status": "error",
                     "params": {
                         "q": "Judul lagu yang liriknya ingin dicari."
                     }

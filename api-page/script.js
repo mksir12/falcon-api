@@ -825,13 +825,6 @@ class APIDocumentation {
         metricsDiv.innerHTML = metricsHTML;
         parentContainer.appendChild(metricsDiv);
     }
-        
-        // Add metrics after response content
-        const metricsDiv = document.createElement('div');
-        metricsDiv.innerHTML = metricsHTML;
-        this.elements.responseCode.parentElement.appendChild(metricsDiv);
-    }
-    
     syntaxHighlightJSON(json) {
         return json
             .replace(/&/g, '&amp;')

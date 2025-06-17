@@ -431,9 +431,12 @@ class APIDocumentation {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const card = e.target.closest('.api-card');
-                const apiData = card.dataset.api;
+                const apiDataEncoded = card.dataset.apiEncoded;
                 try {
-                    this.openAPIModal(JSON.parse(apiData));
+                    // Decode from base64
+                    const apiDataJson = decodeURIComponent(escape(atob(apiDataEncoded)));
+                    const apiData = JSON.parse(apiDataJson);
+                    this.openAPIModal(apiData);
                 } catch (error) {
                     console.error('Error parsing API data:', error);
                     this.showToast('Error loading API details', 'error');
@@ -457,7 +460,16 @@ class APIDocumentation {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const card = e.target.closest('.api-card');
-                this.openAPIModal(JSON.parse(card.dataset.api));
+                const apiDataEncoded = card.dataset.apiEncoded;
+                try {
+                    // Decode from base64
+                    const apiDataJson = decodeURIComponent(escape(atob(apiDataEncoded)));
+                    const apiData = JSON.parse(apiDataJson);
+                    this.openAPIModal(apiData);
+                } catch (error) {
+                    console.error('Error parsing API data:', error);
+                    this.showToast('Error loading API details', 'error');
+                }
             });
         });
     }
@@ -491,8 +503,19 @@ class APIDocumentation {
         
         const currentStatus = statusConfig[status] || statusConfig.ready;
         
+        // Escape special characters for safe JSON stringification
+        const safeApi = {
+            ...api,
+            name: this.escapeHtml(api.name),
+            desc: this.escapeHtml(api.desc),
+            innerDesc: api.innerDesc ? this.escapeHtml(api.innerDesc) : undefined
+        };
+        
+        // Use base64 encoding to safely store JSON data
+        const apiDataEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(safeApi))));
+        
         return `
-            <div class="api-card reveal" data-api='${JSON.stringify(api)}' style="animation-delay: ${index * 0.05}s">
+            <div class="api-card reveal" data-api-encoded="${apiDataEncoded}" style="animation-delay: ${index * 0.05}s">
                 <div class="api-card-header">
                     <h3 class="api-card-title">
                         <div class="api-card-icon">
@@ -520,6 +543,18 @@ class APIDocumentation {
                 </div>
             </div>
         `;
+    }
+    
+    // Helper function to escape HTML
+    escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
     }
     
     renderEmptyState(message = 'No APIs available') {
@@ -865,11 +900,31 @@ class APIDocumentation {
         try {
             const response = await fetch('/notifications.json');
             if (response.ok) {
-                this.notifications = await response.json();
+                const notifications = await response.json();
+                // Add ID if not exists
+                this.notifications = notifications.map((notif, index) => ({
+                    id: notif.id || `notif-${index}`,
+                    date: notif.date || new Date().toISOString(),
+                    read: notif.read || false,
+                    title: notif.title || 'Notification',
+                    message: notif.message || '',
+                    ...notif
+                }));
                 this.updateNotificationBadge();
             }
         } catch (error) {
             console.error('Failed to load notifications:', error);
+            // Use default notifications if file not found
+            this.notifications = [
+                {
+                    id: 'welcome',
+                    date: new Date().toISOString(),
+                    title: 'Welcome!',
+                    message: 'Welcome to Falcon API Documentation',
+                    read: false
+                }
+            ];
+            this.updateNotificationBadge();
         }
     }
     
@@ -883,19 +938,191 @@ class APIDocumentation {
     }
     
     showNotifications() {
-        const unreadNotifications = this.notifications.filter(n => !n.read);
+        // Create notification panel if not exists
+        let notificationPanel = document.getElementById('notificationPanel');
         
-        if (unreadNotifications.length === 0) {
-            this.showToast('No new notifications', 'info');
-            return;
+        if (!notificationPanel) {
+            notificationPanel = document.createElement('div');
+            notificationPanel.id = 'notificationPanel';
+            notificationPanel.className = 'notification-panel';
+            notificationPanel.innerHTML = `
+                <div class="notification-panel-header">
+                    <h3>Notifications</h3>
+                    <button class="notification-panel-close" onclick="document.getElementById('notificationPanel').classList.remove('show')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="notification-panel-content" id="notificationContent">
+                    <!-- Notifications will be added here -->
+                </div>
+            `;
+            document.body.appendChild(notificationPanel);
+            
+            // Add styles for notification panel
+            const style = document.createElement('style');
+            style.textContent = `
+                .notification-panel {
+                    position: fixed;
+                    top: var(--header-height);
+                    right: -400px;
+                    width: 400px;
+                    height: calc(100vh - var(--header-height));
+                    background: var(--surface-color);
+                    box-shadow: var(--shadow-xl);
+                    z-index: var(--z-modal);
+                    transition: right 0.3s ease;
+                    display: flex;
+                    flex-direction: column;
+                }
+                
+                .notification-panel.show {
+                    right: 0;
+                }
+                
+                .notification-panel-header {
+                    padding: 1.5rem;
+                    border-bottom: 1px solid var(--border-color);
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                
+                .notification-panel-header h3 {
+                    margin: 0;
+                    font-size: 1.25rem;
+                    font-weight: 700;
+                }
+                
+                .notification-panel-close {
+                    background: transparent;
+                    border: none;
+                    color: var(--text-muted);
+                    font-size: 1.25rem;
+                    cursor: pointer;
+                    padding: 0.5rem;
+                    border-radius: var(--border-radius-sm);
+                    transition: var(--transition);
+                }
+                
+                .notification-panel-close:hover {
+                    background: var(--highlight-color);
+                    color: var(--primary-color);
+                }
+                
+                .notification-panel-content {
+                    flex: 1;
+                    overflow-y: auto;
+                    padding: 1rem;
+                }
+                
+                .notification-item {
+                    background: var(--background-color);
+                    border-radius: var(--border-radius);
+                    padding: 1rem;
+                    margin-bottom: 1rem;
+                    border-left: 4px solid var(--primary-color);
+                    transition: var(--transition);
+                }
+                
+                .notification-item:hover {
+                    transform: translateX(-5px);
+                    box-shadow: var(--shadow);
+                }
+                
+                .notification-item.unread {
+                    border-left-color: var(--accent-color);
+                    background: var(--highlight-color);
+                }
+                
+                .notification-date {
+                    font-size: 0.75rem;
+                    color: var(--text-muted);
+                    margin-bottom: 0.25rem;
+                }
+                
+                .notification-title {
+                    font-weight: 600;
+                    margin-bottom: 0.25rem;
+                }
+                
+                .notification-message {
+                    font-size: 0.9rem;
+                    color: var(--text-muted);
+                }
+                
+                .notification-empty {
+                    text-align: center;
+                    padding: 3rem;
+                    color: var(--text-muted);
+                }
+                
+                .notification-empty i {
+                    font-size: 3rem;
+                    margin-bottom: 1rem;
+                    opacity: 0.3;
+                }
+                
+                @media (max-width: 768px) {
+                    .notification-panel {
+                        width: 100%;
+                        right: -100%;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
         }
         
-        unreadNotifications.forEach(notification => {
-            this.showToast(notification.message, 'notification', notification.title);
-            notification.read = true;
-        });
+        // Populate notifications
+        const notificationContent = document.getElementById('notificationContent');
         
-        this.updateNotificationBadge();
+        if (this.notifications.length === 0) {
+            notificationContent.innerHTML = `
+                <div class="notification-empty">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>No notifications</p>
+                </div>
+            `;
+        } else {
+            const notificationHTML = this.notifications.map(notification => {
+                const date = new Date(notification.date).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+                
+                return `
+                    <div class="notification-item ${notification.read ? '' : 'unread'}" data-id="${notification.id}">
+                        <div class="notification-date">${date}</div>
+                        ${notification.title ? `<div class="notification-title">${notification.title}</div>` : ''}
+                        <div class="notification-message">${notification.message}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            notificationContent.innerHTML = notificationHTML;
+            
+            // Mark as read when clicked
+            notificationContent.querySelectorAll('.notification-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const id = item.dataset.id;
+                    const notification = this.notifications.find(n => n.id === id);
+                    if (notification) {
+                        notification.read = true;
+                        item.classList.remove('unread');
+                        this.updateNotificationBadge();
+                    }
+                });
+            });
+        }
+        
+        // Show panel
+        notificationPanel.classList.add('show');
+        
+        // Mark all as read after 2 seconds
+        setTimeout(() => {
+            this.notifications.forEach(n => n.read = true);
+            this.updateNotificationBadge();
+        }, 2000);
     }
     
     // Toast Notifications

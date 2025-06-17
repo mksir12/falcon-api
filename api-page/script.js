@@ -794,6 +794,14 @@ class APIDocumentation {
     }
     
     displayPerformanceMetrics(responseTime, response) {
+        const parentContainer = this.elements.responseCode.parentElement;
+        
+        // Cek dan hapus blok metrics yang sudah ada sebelumnya
+        const existingMetrics = parentContainer.querySelector('.performance-metrics');
+        if (existingMetrics) {
+            existingMetrics.remove();
+        }
+
         const size = response.headers.get('Content-Length') || 'N/A';
         const metricsHTML = `
             <div class="performance-metrics">
@@ -811,6 +819,12 @@ class APIDocumentation {
                 </div>
             </div>
         `;
+        
+        // Tambahkan metrics yang baru ke dalam response content
+        const metricsDiv = document.createElement('div');
+        metricsDiv.innerHTML = metricsHTML;
+        parentContainer.appendChild(metricsDiv);
+    }
         
         // Add metrics after response content
         const metricsDiv = document.createElement('div');

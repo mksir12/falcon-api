@@ -3,19 +3,22 @@
     "id": "#02",
     "date": "2025-06-01",
     "title": "Update Tampilan API!", 
-    "message": "Sekarang ada update baru dari API, Silahkan cek informasinya di saluran WhatsApp kami"
+    "message": "Sekarang ada update baru dari API, Silahkan cek informasinya di saluran WhatsApp kami",
+    "read": true
   },
   
   {
     "id": "#03",
     "date": "2025-06-08",
     "title": "Update Endpoint API!", 
-    "message": "API kami sudah memiliki banyak update endpoint, silahkan di lihat dan jangan lupa cek infonya di whatsapp channel kami"
+    "message": "API kami sudah memiliki banyak update endpoint, silahkan di lihat dan jangan lupa cek infonya di whatsapp channel kami",
+    "read": true
   },
   {
     "id": "#03",
     "date": "2025-06-08",
     "title": "Update API!", 
-    "message": "API Sudah update dari tampilan dan lainnya"
+    "message": "API Sudah update dari tampilan dan lainnya",
+    "read": false
   }
 ]

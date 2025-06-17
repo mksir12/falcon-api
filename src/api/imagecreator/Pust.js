@@ -8,8 +8,8 @@ module.exports = function (app) {
       return res.status(400).json({ status: false, message: 'Parameter text wajib diisi.' });
     }
 
-    if (text.length > 135) {
-      return res.status(400).json({ status: false, message: 'Maksimal 135 karakter ya, bre!' });
+    if (text.length > 150) {
+      return res.status(400).json({ status: false, message: 'Maksimal 150 karakter ya, bre!' });
     }
 
     try {

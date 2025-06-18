@@ -222,7 +222,7 @@ const headers = {
 
 async function pixivSearch(query) {
   try {
-    const { data } = await axios.get(`https://www.pixiv.net/touch/ajax/tag_portal?word=${encodeURIComponent(query)}&lang=en`, { headers });
+    const { data } = await axios.get(`https://www.pixiv.net/ajax/search/artworks/${encodeURIComponent(query)}?mode=all&p=${page}`, { headers });
     return data.body?.illusts || [];
   } catch {
     return [];

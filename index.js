@@ -14,6 +14,27 @@ let injectAnalytics;
   injectAnalytics = analytics.injectAnalytics;
 })();
 
+// Middleware untuk proteksi direktori /src
+const protectSrcDirectory = (req, res, next) => {
+    // Tentukan kunci rahasia Anda. Ganti 'admin' dengan kunci yang lebih aman.
+    const adminKey = 'admin#1221'; 
+    
+    // Ambil kunci yang diberikan oleh pengguna dari query URL (?key=...)
+    const providedKey = req.query.key;
+
+    // Cek apakah kunci yang diberikan sama dengan kunci admin
+    if (providedKey && providedKey === adminKey) {
+        // Jika kunci cocok, izinkan akses dan lanjutkan ke request berikutnya
+        next();
+    } else {
+           res.status(403).json({
+            status: 403,
+            message: 'Forbidden: You do not have permission to access this resource.'
+        });
+    }
+};
+
+
 
 app.enable("trust proxy");
 app.set("json spaces", 2);
@@ -30,7 +51,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 app.use('/', express.static(path.join(__dirname, 'api-page')));
 app.use('/src', express.static(path.join(__dirname, 'src')));
-
+app.use('/src', protectSrcDirectory);
 const settingsPath = path.join(__dirname, './src/settings.json');
 const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
 global.apikey = settings.apiSettings.apikey

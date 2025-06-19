@@ -173,8 +173,13 @@ module.exports = function (app) {
     try {
       const $ = await fetchHtml(url);
       const title = $('h1.entry-title').text().trim();
-      const image = resolveImage($('div.bigcover div.ime img').attr('data-src') || $('div.bigcover div.ime img').attr('src'));
-      const synopsis = $('div.bixbox.synp div.entry-content').text().trim();
+      const coverEl = $('.bigcover .ime img');
+    let cover = coverEl.attr('data-src') || coverEl.attr('src') || '';
+    cover = cover.startsWith('data:') ? null : cover.trim();
+
+    const thumbEl = $('.thumbook .thumb img');
+    let thumb = thumbEl.attr('data-src') || thumbEl.attr('src') || '';
+    thumb = thumb.startsWith('data:') ? null : thumb.trim(); const synopsis = $('div.bixbox.synp div.entry-content').text().trim();
 
       const information = {};
       $('div.infox div.spe span').each((_, el) => {
@@ -191,7 +196,7 @@ module.exports = function (app) {
       res.json({
         status: true,
         creator: "FlowFalcon",
-        result: { title, image, synopsis, information, genres, download_api }
+        result: { title, thumb, cover, synopsis, information, genres, download_api }
       });
     } catch (err) {
       res.status(500).json({ status: false, message: err.message });

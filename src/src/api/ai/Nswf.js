@@ -64,7 +64,7 @@ module.exports = function (app) {
       }, { httpsAgent });
 
       let resultUrl = null;
-      const maxTries = 60;
+      const maxTries = 30;
 
       for (let i = 0; i < maxTries; i++) {
         const { data: stream } = await axios.get(`${base}/gradio_api/queue/data?session_hash=${session_hash}`, {

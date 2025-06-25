@@ -30,7 +30,7 @@ module.exports = function (app) {
     }
 
     try {
-      const image = await axios.get(`https://canvas-api-seven.vercel.app/api/layout?bg=${encodeURIComponent(bg)}&ppuser=${encodeURIComponent(ppuser)}&content=promote&subtext=${encodeURIComponent(text)}`, {
+      const image = await axios.get(`https://fathur.dpdns.org/api/layout?bg=${encodeURIComponent(bg)}&ppuser=${encodeURIComponent(ppuser)}&content=PROMOTE&subtext=${encodeURIComponent(text)}`, {
         responseType: "arraybuffer"
       });
 

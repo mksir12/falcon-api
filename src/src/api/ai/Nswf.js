@@ -63,9 +63,8 @@ module.exports = function (app) {
         session_hash
       }, { httpsAgent });
 
-      // Polling sampai result keluar (maks 30 detik)
       let resultUrl = null;
-      const maxTries = 30;
+      const maxTries = 60;
 
       for (let i = 0; i < maxTries; i++) {
         const { data: stream } = await axios.get(`${base}/gradio_api/queue/data?session_hash=${session_hash}`, {

@@ -23,7 +23,7 @@ module.exports = function (app) {
     }
 
     try {
-      const url = `https://canvas-api-seven.vercel.app/api/faketiktoke?name=${encodeURIComponent(name)}&username=${encodeURIComponent(username)}&pp=${encodeURIComponent(pp)}&verified=${verified}&followers=${followers}&following=${following}&likes=${likes}&bio=${encodeURIComponent(bio)}&dark=${dark}&isFollow=${isFollow}`;
+      const url = `https://fathur.dpdns.org/api/faketiktoke?name=${encodeURIComponent(name)}&username=${encodeURIComponent(username)}&pp=${encodeURIComponent(pp)}&verified=${verified}&followers=${followers}&following=${following}&likes=${likes}&bio=${encodeURIComponent(bio)}&dark=${dark}&isFollow=${isFollow}`;
       const image = await axios.get(url, { responseType: "arraybuffer" });
 
       res.writeHead(200, {

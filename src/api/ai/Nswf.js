@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = function (app) {
-  const proxy = new ProxyAgent(path.join(__dirname, 'ploxy.txt'), { random: true });
+  const proxy = new ProxyAgent(path.join(__dirname, 'proxies.txt'), { random: true });
 
   app.get('/ai/kivotos', async (req, res) => {
     const {

@@ -28,7 +28,7 @@ module.exports = function (app) {
     }
   }
 
-  app.get('/ai/kivotoss', async (req, res) => {
+  app.get('/ai/kivotos', async (req, res) => {
     // Check and apply rate limit
     const currentTime = Date.now();
     if (currentTime - lastResetTime > RATE_LIMIT_WINDOW_MS) {

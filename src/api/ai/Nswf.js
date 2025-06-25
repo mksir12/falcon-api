@@ -6,6 +6,12 @@ const {HttpsProxyAgent} = require('https-proxy-agent');
 module.exports = function (app) {
   const proxyPath = path.join(__dirname, 'ploxy.txt');
 
+  // Rate limiting variables
+  const RATE_LIMIT_COUNT = 15; // Max 15 requests
+  const RATE_LIMIT_WINDOW_MS = 60 * 1000; // per 1 minute (60,000 milliseconds)
+  let requestCounts = 0; // Global request counter for the endpoint
+  let lastResetTime = Date.now(); // Last time the counter was reset
+
   function getRandomProxyAgent() {
     try {
       if (!fs.existsSync(proxyPath)) throw new Error('File proxies tidak ditemukan');
@@ -23,6 +29,24 @@ module.exports = function (app) {
   }
 
   app.get('/ai/kivotos', async (req, res) => {
+    // Check and apply rate limit
+    const currentTime = Date.now();
+    if (currentTime - lastResetTime > RATE_LIMIT_WINDOW_MS) {
+      // Reset counter if window has passed
+      requestCounts = 0;
+      lastResetTime = currentTime;
+    }
+
+    if (requestCounts >= RATE_LIMIT_COUNT) {
+      return res.status(429).json({
+        status: false,
+        message: 'Too Many Requests: Batas 15 permintaan per menit telah tercapai.'
+      });
+    }
+
+    // Increment request count
+    requestCounts++;
+
     const {
       prompt,
       style = 'anime',

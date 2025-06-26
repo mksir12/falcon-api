@@ -1,16 +1,19 @@
-const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
-const ProxyAgent = require('@rynn-k/proxy-agent');
+const axios = require('axios');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 
 module.exports = function (app) {
-  const proxy = new ProxyAgent(path.join(__dirname, 'proxies.txt'), { random: true });
+  // Ambil proxy acak dari file
+  function getRandomProxy() {
+    const proxies = fs.readFileSync(path.join(__dirname, 'ploxy.txt'), 'utf-8')
+      .split('\n')
+      .map(p => p.trim())
+      .filter(p => p && p.startsWith('http'));
 
-  function getRandomUA() {
-    const file = path.join(__dirname, 'ua.txt');
-    const lines = fs.readFileSync(file, 'utf-8').split('\n').map(l => l.trim()).filter(Boolean);
-    if (!lines.length) throw new Error('User-Agent list kosong');
-    return lines[Math.floor(Math.random() * lines.length)];
+    if (!proxies.length) throw new Error('Proxy error');
+    const random = proxies[Math.floor(Math.random() * proxies.length)];
+    return random;
   }
 
   app.get('/ai/kivotos', async (req, res) => {
@@ -24,25 +27,37 @@ module.exports = function (app) {
     } = req.query;
 
     if (!prompt) {
-      return res.status(400).json({ status: false, creator: 'FlowFalcon', message: 'Parameter prompt wajib diisi' });
+      return res.status(400).json({
+        status: false,
+        creator: 'FlowFalcon',
+        message: 'Parameter "prompt" wajib diisi.'
+      });
     }
 
-    const validStyles = ['anime', 'real', 'photo'];
-    if (!validStyles.includes(style)) {
-      return res.status(400).json({ status: false, creator: 'FlowFalcon', message: `Style harus salah satu dari: ${validStyles.join(', ')}` });
+    const styles = ['anime', 'real', 'photo'];
+    if (!styles.includes(style)) {
+      return res.status(400).json({
+        status: false,
+        creator: 'FlowFalcon',
+        message: `Style tidak valid. Pilih salah satu: ${styles.join(', ')}`
+      });
     }
+
+    const base = `https://heartsync-nsfw-uncensored${style !== 'anime' ? `-${style}` : ''}.hf.space`;
+    const session_hash = Math.random().toString(36).slice(2);
+    const negative_prompt = 'lowres, bad anatomy, bad hands, text, error, missing finger, extra digits, cropped, worst quality, low quality, watermark, blurry';
+
+    let proxy;
+    try {
+      proxy = getRandomProxy();
+      console.log(`[🔁] Menggunakan proxy: ${proxy}`);
+    } catch (e) {
+      return res.status(500).json({ status: false, message: e.message });
+    }
+
+    const httpsAgent = new HttpsProxyAgent(proxy);
 
     try {
-      const agent = proxy.config();
-      const ua = getRandomUA();
-      const session_hash = Math.random().toString(36).slice(2);
-      const base = `https://heartsync-nsfw-uncensored${style !== 'anime' ? `-${style}` : ''}.hf.space`;
-
-      const negative_prompt = 'lowres, bad anatomy, bad hands, text, error, missing finger, extra digits, cropped, worst quality, low quality, watermark, blurry';
-
-      console.log(`[🔗] Using Proxy: ${agent.httpsAgent.proxy?.href || '[Custom Proxy]'}`);
-      console.log(`[🛡️] User-Agent: ${ua}`);
-
       // Step 1: Join queue
       await axios.post(`${base}/gradio_api/queue/join`, {
         data: [
@@ -59,58 +74,49 @@ module.exports = function (app) {
         fn_index: 2,
         trigger_id: 16,
         session_hash
-      }, {
-        ...agent,
-        headers: {
-          'User-Agent': ua,
-        }
-      });
+      }, { httpsAgent, timeout: 25000 });
 
-      // Step 2: Poll result (maks 15 detik)
-      let result = null;
-      const start = Date.now();
-      const timeout = 15 * 1000;
-
-      while (Date.now() - start < timeout) {
-        const { data: stream } = await axios.get(`${base}/gradio_api/queue/data?session_hash=${session_hash}`, {
-          ...agent,
-          headers: { 'User-Agent': ua },
+      // Step 2: Polling max 8x (16 detik)
+      let resultUrl = null;
+      for (let i = 0; i < 8; i++) {
+        const { data: raw } = await axios.get(`${base}/gradio_api/queue/data?session_hash=${session_hash}`, {
+          httpsAgent,
+          timeout: 15000,
           responseType: 'text'
         });
 
-        const lines = stream.split('\n\n');
+        const lines = raw.split('\n\n');
         for (const line of lines) {
           if (line.startsWith('data:')) {
-            const parsed = JSON.parse(line.slice(6));
-            if (parsed.msg === 'process_completed') {
-              result = parsed.output?.data?.[0]?.url;
+            const json = JSON.parse(line.slice(6));
+            if (json.msg === 'process_completed') {
+              resultUrl = json.output?.data?.[0]?.url;
               break;
             }
           }
         }
 
-        if (result) break;
+        if (resultUrl) break;
         await new Promise(r => setTimeout(r, 2000));
       }
 
-      if (!result) {
+      if (!resultUrl) {
         return res.status(500).json({
           status: false,
           creator: 'FlowFalcon',
-          message: 'Gagal mendapatkan gambar dari server NSFW (Timeout)'
+          message: 'Gagal mendapatkan gambar dari server (Timeout)'
         });
       }
 
-      // Step 3: Get final image
-      const img = await axios.get(result, {
+      // Step 3: Ambil gambar
+      const img = await axios.get(resultUrl, {
+        httpsAgent,
         responseType: 'arraybuffer',
-        headers: { 'Referer': base, 'User-Agent': ua },
-        ...agent
+        headers: { Referer: base }
       });
 
       res.setHeader('Content-Type', 'image/png');
       return res.send(img.data);
-
     } catch (err) {
       return res.status(500).json({
         status: false,

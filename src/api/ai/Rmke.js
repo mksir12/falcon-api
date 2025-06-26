@@ -48,7 +48,7 @@ module.exports = function (app) {
         authorization: '',
         origin: 'https://remaker.ai',
         'product-code': '067003',
-        'product-serial': '7858ccf6b18ce68bf56a8163c17ee64a',
+        'product-serial': 'c25cb430662409bdea35c95eceaffa1f',
         referer: 'https://remaker.ai/',
         'user-agent': ua
       };

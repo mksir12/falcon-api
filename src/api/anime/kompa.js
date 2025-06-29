@@ -154,7 +154,6 @@ module.exports = function (app) {
         genre: $('.infox .genxed a').map((_, el) => $(el).text().trim()).get(),
         streamingServers: [],
         downloadLinks: [],
-        trendingAnime: [],
         relatedAnime: [],
         complete: {
           status: getInfoText($, 'Status'),
@@ -185,15 +184,6 @@ module.exports = function (app) {
         animeData.downloadLinks.push({ quality, links });
       });
 
-      $('.serieslist.pop ul li').each((_, el) => {
-        animeData.trendingAnime.push({
-          title: $(el).find('.leftseries h4 a').text().trim() || null,
-          url: $(el).find('.leftseries h4 a').attr('href') || null,
-          image: cleanImage($(el).find('img').attr('src') || $(el).find('img').attr('data-lazy-src')),
-          rating: $(el).find('.numscore').text().trim() || null,
-          genre: $(el).find('.leftseries span a').map((_, a) => $(a).text().trim()).get()
-        });
-      });
 
       $('#sidebar .serieslist ul li').each((_, el) => {
         animeData.relatedAnime.push({

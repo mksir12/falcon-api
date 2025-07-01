@@ -3,7 +3,7 @@ const FormData = require('form-data');
 
 module.exports = function (app) {
   app.get('/tools/mailsend', async (req, res) => {
-    const { email, subject, message, base = '1', is_html = 'false' } = req.query;
+    const { email, subject, message, base = '1', is_html = 'true' } = req.query;
 
     if (!email || !subject || !message) {
       return res.status(400).json({

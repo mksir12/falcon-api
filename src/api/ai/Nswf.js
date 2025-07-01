@@ -1,21 +1,6 @@
-const fs = require('fs');
-const path = require('path');
 const axios = require('axios');
-const { HttpsProxyAgent } = require('https-proxy-agent');
 
 module.exports = function (app) {
-  // Ambil proxy acak dari file
-  function getRandomProxy() {
-    const proxies = fs.readFileSync(path.join(__dirname, 'ploxy.txt'), 'utf-8')
-      .split('\n')
-      .map(p => p.trim())
-      .filter(p => p && p.startsWith('http'));
-
-    if (!proxies.length) throw new Error('Proxy error');
-    const random = proxies[Math.floor(Math.random() * proxies.length)];
-    return random;
-  }
-
   app.get('/ai/kivotos', async (req, res) => {
     const {
       prompt,
@@ -47,15 +32,12 @@ module.exports = function (app) {
     const session_hash = Math.random().toString(36).slice(2);
     const negative_prompt = 'lowres, bad anatomy, bad hands, text, error, missing finger, extra digits, cropped, worst quality, low quality, watermark, blurry';
 
-    let proxy;
-    try {
-      proxy = getRandomProxy();
-      console.log(`[🔁] Menggunakan proxy: ${proxy}`);
-    } catch (e) {
-      return res.status(500).json({ status: false, message: e.message });
-    }
-
-    const httpsAgent = new HttpsProxyAgent(proxy);
+    const headers = {
+      'User-Agent': `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:${Math.floor(Math.random() * 20) + 80}.0) Gecko/20100101 Firefox/${Math.floor(Math.random() * 20) + 80}.0`,
+      'Referer': base,
+      'Origin': base,
+      'Accept': '*/*'
+    };
 
     try {
       // Step 1: Join queue
@@ -74,13 +56,14 @@ module.exports = function (app) {
         fn_index: 2,
         trigger_id: 16,
         session_hash
-      }, { httpsAgent, timeout: 25000 });
+      }, { headers, timeout: 25000 });
 
-      // Step 2: Polling max 8x (16 detik)
+      // Step 2: Polling max 20 detik
       let resultUrl = null;
-      for (let i = 0; i < 8; i++) {
+      const startTime = Date.now();
+      while (Date.now() - startTime < 20000) { // max 20 detik
         const { data: raw } = await axios.get(`${base}/gradio_api/queue/data?session_hash=${session_hash}`, {
-          httpsAgent,
+          headers,
           timeout: 15000,
           responseType: 'text'
         });
@@ -97,32 +80,31 @@ module.exports = function (app) {
         }
 
         if (resultUrl) break;
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, 1500 + Math.floor(Math.random() * 1000)));
       }
 
       if (!resultUrl) {
-        return res.status(500).json({
+        return res.status(429).json({
           status: false,
           creator: 'FlowFalcon',
-          message: 'Gagal mendapatkan gambar dari server (Timeout)'
+          message: 'Limit telah tercapai, tunggu beberapa jam kedepan'
         });
       }
 
       // Step 3: Ambil gambar
       const img = await axios.get(resultUrl, {
-        httpsAgent,
         responseType: 'arraybuffer',
-        headers: { Referer: base }
+        headers
       });
 
       res.setHeader('Content-Type', 'image/png');
       return res.send(img.data);
+
     } catch (err) {
-      return res.status(500).json({
+      return res.status(429).json({
         status: false,
         creator: 'FlowFalcon',
-        message: 'Gagal generate NSFW image',
-        error: err.message
+        message: 'Limit telah tercapai, tunggu beberapa jam kedepan'
       });
     }
   });

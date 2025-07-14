@@ -82,56 +82,65 @@ module.exports = function (app) {
   });
 
   // === DETAIL ===
-  app.get('/anime/kompi/detail', async (req, res) => {
-    const url = req.query.url;
-    if (!url) return res.status(400).json({ status: false, creator: 'FlowFalcon', message: 'Parameter url wajib diisi' });
+app.get('/anime/kompi/detail', async (req, res) => {
+  const url = req.query.url;
+  if (!url) return res.status(400).json({ status: false, creator: 'FlowFalcon', message: 'Parameter url wajib diisi' });
 
-    try {
-      const { data } = await axios.get(url);
-      const $ = cheerio.load(data);
+  try {
+    const { data } = await axios.get(url);
+    const $ = cheerio.load(data);
 
-      const animeData = {
-        title: $('.bigcontent .infox .entry-title').text(),
-        alternativeTitle: $('.bigcontent .infox .ninfo .alter').text(),
-        status: $('.bigcontent .infox .ninfo .info-content .spe span:contains("Status:")').text().replace('Status:', '').trim(),
-        studio: $('.bigcontent .infox .ninfo .info-content .spe span:contains("Studio:") a').text(),
-        releaseDate: $('.bigcontent .infox .ninfo .info-content .spe span:contains("Dirilis:") time').attr('datetime'),
-        duration: $('.bigcontent .infox .ninfo .info-content .spe span:contains("Durasi:")').text().replace('Durasi:', '').trim(),
-        season: $('.bigcontent .infox .ninfo .info-content .spe span:contains("Season:") a').text(),
-        type: $('.bigcontent .infox .ninfo .info-content .spe span:contains("Tipe:")').text().replace('Tipe:', '').trim(),
-        fansub: $('.bigcontent .infox .ninfo .info-content .spe span:contains("Fansub:")').text().replace('Fansub:', '').trim(),
-        genres: $('.bigcontent .infox .ninfo .info-content .genxed a').map((_, el) => $(el).text()).get(),
-        description: $('.bixbox.synp .entry-content').text().trim(),
-        imageUrl: [{
-          bigCover: $('.bigcover .ime img').attr('data-lazy-src'),
-          cover: $('.bigcontent .thumbook .thumb img').attr('data-lazy-src')
-        }],
-        episodes: [],
-        recommendations: []
-      };
+    const animeData = {
+      title: $('.bigcontent .infox .entry-title').text(),
+      alternativeTitle: $('.bigcontent .infox .ninfo .alter').text(),
+      status: $('.bigcontent .infox .ninfo .info-content .spe span:contains("Status:")').text().replace('Status:', '').trim(),
+      studio: $('.bigcontent .infox .ninfo .info-content .spe span:contains("Studio:") a').text(),
+      releaseDate: $('.bigcontent .infox .ninfo .info-content .spe span:contains("Dirilis:") time').attr('datetime'),
+      duration: $('.bigcontent .infox .ninfo .info-content .spe span:contains("Durasi:")').text().replace('Durasi:', '').trim(),
+      season: $('.bigcontent .infox .ninfo .info-content .spe span:contains("Season:") a').text(),
+      type: $('.bigcontent .infox .ninfo .info-content .spe span:contains("Tipe:")').text().replace('Tipe:', '').trim(),
+      fansub: $('.bigcontent .infox .ninfo .info-content .spe span:contains("Fansub:")').text().replace('Fansub:', '').trim(),
+      genres: $('.bigcontent .infox .ninfo .info-content .genxed a').map((_, el) => $(el).text()).get(),
+      description: $('.bixbox.synp .entry-content').text().trim(),
+      imageUrl: [{
+        bigCover: $('.bigcover .ime img').attr('data-lazy-src'),
+        cover: $('.bigcontent .thumbook .thumb img').attr('data-lazy-src')
+      }],
+      episodes: [],
+      recommendations: []
+    };
 
-      $('.bxcl.epcheck .eplister ul li').each((_, el) => {
-        animeData.episodes.push({
-          number: $(el).find('.epl-num').text(),
-          title: $(el).find('.epl-title').text(),
-          url: $(el).find('a').attr('href'),
-          date: $(el).find('.epl-date').text()
-        });
+    // Fix parsing episodes / chapter list
+    $('.flexch').each((_, el) => {
+      const link = $(el).find('.flexch-infoz a');
+      const chapterUrl = link.attr('href');
+      const date = link.find('.date').text().trim();
+
+      let fullTitle = link.text().trim();
+      let title = fullTitle.replace(date, '').trim();
+
+      animeData.episodes.push({
+        title,
+        date,
+        chapter_api: `https://flowfalcon.dpdns.org/anime/doujin/chapter?url=${encodeURIComponent(chapterUrl)}`,
+        download_api: `https://flowfalcon.dpdns.org/anime/doujin/download?url=${encodeURIComponent(chapterUrl)}`
       });
+    });
 
-      $('.listupd .bs').each((_, el) => {
-        animeData.recommendations.push({
-          title: $(el).find('.tt h2').text(),
-          url: $(el).find('a').attr('href'),
-          image: $(el).find('.limit img').attr('data-lazy-src')
-        });
+    // Recommendations section
+    $('.listupd .bs').each((_, el) => {
+      animeData.recommendations.push({
+        title: $(el).find('.tt h2').text(),
+        url: $(el).find('a').attr('href'),
+        image: $(el).find('.limit img').attr('data-lazy-src')
       });
+    });
 
-      res.json({ status: true, creator: 'FlowFalcon', result: animeData });
-    } catch (err) {
-      res.status(500).json({ status: false, creator: 'FlowFalcon', message: err.message });
-    }
-  });
+    res.json({ status: true, creator: 'FlowFalcon', result: animeData });
+  } catch (err) {
+    res.status(500).json({ status: false, creator: 'FlowFalcon', message: err.message });
+  }
+});
 
   // === STREAM ===
   app.get('/anime/kompi/stream', async (req, res) => {

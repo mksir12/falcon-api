@@ -41,49 +41,58 @@ module.exports = function (app) {
   });
 
   // 📖 Detail Manga
-  app.get('/anime/doujin/detail', async (req, res) => {
+app.get('/anime/doujin/detail', async (req, res) => {
     const { url } = req.query;
     if (!url) return res.status(400).json({ status: false, message: 'Parameter url wajib diisi.' });
 
     try {
-      const $ = await fetchHtml(url);
-      const title = $('.series-titlex h2').text().trim();
-      const type = $('.series-infoz .type').text().trim();
-      const statusText = $('.series-infoz .status').text().trim();
-      const cover = $('.series-thumb img').attr('data-src') || $('.series-thumb img').attr('src');
-      const synopsis = $('.series-synops p').text().trim();
+        const $ = await fetchHtml(url);
+        const title = $('.series-titlex h2').text().trim();
+        const type = $('.series-infoz .type').text().trim();
+        const statusText = $('.series-infoz .status').text().trim();
+        const cover = $('.series-thumb img').attr('data-src') || $('.series-thumb img').attr('src');
+        const synopsis = $('.series-synops p').text().trim();
 
-      const info = {
-        published: $('.series-infolist li:contains("Published") span').text().trim(),
-        author: $('.series-infolist li:contains("Author") span').text().trim(),
-        totalChapter: $('.series-infolist li:contains("Total Chapter") span.chapter').text().trim()
-      };
+        const info = {
+            published: $('.series-infolist li:contains("Published") span').text().trim(),
+            author: $('.series-infolist li:contains("Author") span').text().trim(),
+            totalChapter: $('.series-infolist li:contains("Total Chapter") span.chapter').text().trim()
+        };
 
-      const genres = [];
-      $('.series-genres a').each((_, el) => genres.push($(el).text().trim()));
+        const genres = [];
+        $('.series-genres a').each((_, el) => genres.push($(el).text().trim()));
 
-      const chapters = [];
-      $('.series-chapterlist li').each((_, el) => {
-        const chapterTitle = $(el).find('.flexch-infoz a span').text().trim();
-        const chapterLink = $(el).find('.flexch-infoz a').attr('href');
-        const date = $(el).find('.flexch-date').text().trim();
-        chapters.push({
-          title: chapterTitle,
-          date,
-          chapter_api: `${apiBase}/chapter?url=${encodeURIComponent(chapterLink)}`,
-          download_api: `${apiBase}/download?url=${encodeURIComponent(chapterLink)}`
+        const chapters = [];
+        $('.series-chapterlist li').each((_, el) => {
+            const aTag = $(el).find('.flexch-infoz a');
+            const chapterLink = aTag.attr('href');
+
+            // Ambil judul tanpa tanggal
+            const chapterSpan = aTag.find('span').first().clone();
+            chapterSpan.find('.date').remove(); // Hapus tanggal dari dalam span
+            const chapterTitle = chapterSpan.text().trim();
+
+            // Ambil tanggal dari span.date
+            const date = aTag.find('.date').text().trim();
+
+            chapters.push({
+                title: chapterTitle,
+                date,
+                chapter_api: `${apiBase}/chapter?url=${encodeURIComponent(chapterLink)}`,
+                download_api: `${apiBase}/download?url=${encodeURIComponent(chapterLink)}`
+            });
         });
-      });
 
-      res.json({
-        status: true,
-        creator: "FlowFalcon",
-        result: { title, type, status: statusText, cover, synopsis, info, genres, chapters }
-      });
+        res.json({
+            status: true,
+            creator: "FlowFalcon",
+            result: { title, type, status: statusText, cover, synopsis, info, genres, chapters }
+        });
     } catch (e) {
-      res.status(500).json({ status: false, message: e.message });
+        res.status(500).json({ status: false, message: e.message });
     }
-  });
+});
+
 
   // 🖼️ Ambil Gambar Chapter
   app.get('/anime/doujin/chapter', async (req, res) => {

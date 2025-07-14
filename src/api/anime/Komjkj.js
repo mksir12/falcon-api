@@ -67,12 +67,10 @@ app.get('/anime/doujin/detail', async (req, res) => {
             const aTag = $(el).find('.flexch-infoz a');
             const chapterLink = aTag.attr('href');
 
-            // Ambil judul tanpa tanggal
             const chapterSpan = aTag.find('span').first().clone();
-            chapterSpan.find('.date').remove(); // Hapus tanggal dari dalam span
+            chapterSpan.find('.date').remove();
             const chapterTitle = chapterSpan.text().trim();
 
-            // Ambil tanggal dari span.date
             const date = aTag.find('.date').text().trim();
 
             chapters.push({

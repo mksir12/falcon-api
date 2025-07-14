@@ -133,21 +133,6 @@ app.get('/anime/kompi/detail', async (req, res) => {
     }
   });
 
-    // Recommendations section
-    $('.listupd .bs').each((_, el) => {
-      animeData.recommendations.push({
-        title: $(el).find('.tt h2').text(),
-        url: $(el).find('a').attr('href'),
-        image: $(el).find('.limit img').attr('data-lazy-src')
-      });
-    });
-
-    res.json({ status: true, creator: 'FlowFalcon', result: animeData });
-  } catch (err) {
-    res.status(500).json({ status: false, creator: 'FlowFalcon', message: err.message });
-  }
-});
-
   // === STREAM ===
   app.get('/anime/kompi/stream', async (req, res) => {
     const url = req.query.url;

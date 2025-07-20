@@ -124,7 +124,7 @@ class APIDocumentation {
     // Data Loading
     async loadSettings() {
         try {
-            const response = await fetch('/src/settings.json');
+            const response = await fetch('/assets/settings.json');
             if (!response.ok) throw new Error('Failed to load settings');
             
             this.settings = await response.json();
@@ -181,7 +181,7 @@ class APIDocumentation {
             if (banner) {
                 banner.src = this.settings.bannerImage;
                 banner.onerror = () => {
-                    banner.src = '/src/banner.jpg';
+                    banner.src = '/assets/banner.jpg';
                 };
             }
         }
@@ -1265,12 +1265,3 @@ class APIDocumentation {
 document.addEventListener('DOMContentLoaded', () => {
     window.apiDocs = new APIDocumentation();
 });
-
-// Service Worker Registration (for PWA support)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {
-            // Service worker registration failed, app will still work
-        });
-    });
-}

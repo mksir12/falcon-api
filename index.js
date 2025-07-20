@@ -3,78 +3,146 @@ const chalk = require('chalk');
 const fs = require('fs');
 const cors = require('cors');
 const path = require('path');
-require("./function.js")
+const axios = require('axios');
+
+require("./function.js");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
-let injectAnalytics;
-(async () => {
-  const analytics = await import('@vercel/analytics/server');
-  injectAnalytics = analytics.injectAnalytics;
-})();
+// Ganti webhook discord lu disini:
+const WEBHOOK_URL = 'https://discord.com/api/webhooks/1396122030163628112/-vEj4HjREjbaOVXDu5932YjeHpTkjNSKyUKugBFF9yVCBeQSrdgK8qM3HNxVYTOD5BYP';
 
-// Middleware untuk proteksi direktori /src
-const protectSrcDirectory = (req, res, next) => {
-    // Tentukan kunci rahasia Anda. Ganti 'admin' dengan kunci yang lebih aman.
-    const adminKey = 'admin#1221'; 
-    
-    // Ambil kunci yang diberikan oleh pengguna dari query URL (?key=...)
-    const providedKey = req.query.key;
+// Global Cooldown Vars
+let requestCount = 0;
+let isCooldown = false;
 
-    // Cek apakah kunci yang diberikan sama dengan kunci admin
-    if (providedKey && providedKey === adminKey) {
-        // Jika kunci cocok, izinkan akses dan lanjutkan ke request berikutnya
-        next();
-    } else {
-           res.status(403).json({
-            status: 403,
-            message: 'Forbidden: You do not have permission to access this resource.'
-        });
+setInterval(() => {
+    requestCount = 0;
+}, 1000);
+
+function sendDiscordLog({ method, status, url, duration, error = null }) {
+    let colorCode;
+    if (status >= 500) colorCode = '[2;31m'; // merah
+    else if (status >= 400) colorCode = '[2;31m';
+    else if (status === 304) colorCode = '[2;34m';
+    else colorCode = '[2;32m'; // hijau
+
+    let message =
+` \`\`\`ansi
+${colorCode}[${method}] ${status} ${url} - ${duration}ms[0m
+`;
+
+    if (error) {
+        message += `[2;31m[ERROR] ${error.message || error}[0m\n`;
     }
-};
 
+    message += "```";
 
+    axios.post(WEBHOOK_URL, { content: message }).catch(console.error);
+}
+
+// Middleware Rate Limit + Cooldown + Discord Log
+app.use((req, res, next) => {
+    if (isCooldown) {
+        sendDiscordLog({
+            method: req.method,
+            status: 503,
+            url: req.originalUrl,
+            duration: 0,
+            error: 'Server is in cooldown'
+        });
+        return res.status(503).json({ error: 'Server is in cooldown, try again later.' });
+    }
+
+    requestCount++;
+
+    if (requestCount > 25) {
+        isCooldown = true;
+        const cooldownTime = (Math.random() * (120000 - 60000) + 60000).toFixed(3);
+
+        console.log(`⚠️ SPAM DETECT: Cooldown ${cooldownTime / 1000} detik`);
+
+        const msg =
+`
+\`\`\`ansi
+⚠️ [ SPAM DETECT ] ⚠️
+
+[ ! ] Too many requests, server cooldown for ${(cooldownTime / 1000)} sec!
+
+[2;31m[${req.method}] 503 ${req.originalUrl} - 0ms[0m
+\`\`\`
+`;
+
+        axios.post(WEBHOOK_URL, { content: msg }).catch(console.error);
+
+        setTimeout(() => {
+            isCooldown = false;
+            console.log('✅ Cooldown selesai, server aktif lagi');
+        }, cooldownTime);
+
+        return res.status(503).json({ error: 'Too many requests, server cooldown!' });
+    }
+
+    next();
+});
 
 app.enable("trust proxy");
 app.set("json spaces", 2);
-app.use((req, res, next) => {
-    if (injectAnalytics) {
-      res.locals.injectAnalytics = () => injectAnalytics();
-    } else {
-      res.locals.injectAnalytics = () => '';
-    }
-    next();
-  });
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
-app.use('/', express.static(path.join(__dirname, 'api-page')));
-app.use('/src', express.static(path.join(__dirname, 'src')));
-app.use('/src', protectSrcDirectory);
-const settingsPath = path.join(__dirname, './src/settings.json');
-const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
-global.apikey = settings.apiSettings.apikey
 
+// Load Settings
+const settingsPath = path.join(__dirname, './assets/settings.json');
+const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+global.apikey = settings.apiSettings.apikey;
+
+// Custom Log + Wrap res.json + Discord Log semua response
 app.use((req, res, next) => {
-console.log(chalk.bgHex('#FFFF99').hex('#333').bold(` Request Route: ${req.path} `));
-global.totalreq += 1
+    console.log(chalk.bgHex('#FFFF99').hex('#333').bold(` Request Route: ${req.path} `));
+    global.totalreq += 1;
+
+    const start = Date.now();
     const originalJson = res.json;
+
+    // Wrap res.json untuk nambah creator
     res.json = function (data) {
         if (data && typeof data === 'object') {
             const responseData = {
                 status: data.status,
-                creator: settings.apiSettings.creator || "Created Using Skyzo",
+                creator: settings.apiSettings.creator || "FlowFalcon",
                 ...data
             };
             return originalJson.call(this, responseData);
         }
         return originalJson.call(this, data);
     };
+
+    // Log semua response saat finish
+    res.on('finish', () => {
+        const duration = Date.now() - start;
+
+        sendDiscordLog({
+            method: req.method,
+            status: res.statusCode,
+            url: req.originalUrl,
+            duration
+        });
+    });
+
     next();
 });
 
-// Api Route
+// Static & Src Protect
+app.use('/', express.static(path.join(__dirname, 'api-page')));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+app.use('/src', (req, res) => {
+    res.status(403).json({ error: 'Forbidden access' });
+});
+
+// Load API routes dinamis dari src/api/
 let totalRoutes = 0;
 const apiFolder = path.join(__dirname, './src/api');
 fs.readdirSync(apiFolder).forEach((subfolder) => {
@@ -90,19 +158,39 @@ fs.readdirSync(apiFolder).forEach((subfolder) => {
         });
     }
 });
+
 console.log(chalk.bgHex('#90EE90').hex('#333').bold(' Load Complete! ✓ '));
 console.log(chalk.bgHex('#90EE90').hex('#333').bold(` Total Routes Loaded: ${totalRoutes} `));
 
+// Index route
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'api-page', 'index.html'));
 });
 
+// Error handler 404 & 500 + Discord log
 app.use((req, res, next) => {
+    sendDiscordLog({
+        method: req.method,
+        status: 404,
+        url: req.originalUrl,
+        duration: 0,
+        error: 'Not Found'
+    });
+
     res.status(404).sendFile(process.cwd() + "/api-page/404.html");
 });
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
+
+    sendDiscordLog({
+        method: req.method,
+        status: 500,
+        url: req.originalUrl,
+        duration: 0,
+        error: err
+    });
+
     res.status(500).sendFile(process.cwd() + "/api-page/500.html");
 });
 

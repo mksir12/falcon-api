@@ -807,7 +807,7 @@
           "name": "Convert QRIS Image",
           "desc": "Membuat gambar QRIS dengan nominal dan pajak dari gambar QRIS statis.",
           "path": "/imagecreator/convertqris?qris=&amount=&tax=",
-          "status": "error",
+          "status": "ready",
           "params": {
             "qris": "URL gambar QRIS.",
             "amount": "Nominal transaksi.",

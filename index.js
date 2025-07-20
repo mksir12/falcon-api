@@ -33,7 +33,7 @@ ${combinedLogs}
 `;
 
     axios.post(WEBHOOK_URL, { content: payload }).catch(console.error);
-}, 1000);
+}, 2000);
 
 // Function log queue
 function queueLog({ method, status, url, duration, error = null }) {

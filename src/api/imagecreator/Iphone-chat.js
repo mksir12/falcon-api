@@ -19,7 +19,7 @@ module.exports = function (app) {
     }
 
     try {
-      const response = await axios.get(`https://fathur.dpdns.org/api/iqc?text=${encodeURIComponent(text)}`, {
+      const response = await axios.get(`https://fathurweb.xyz/api/iqc?text=${encodeURIComponent(text)}`, {
         responseType: "arraybuffer"
       });
 

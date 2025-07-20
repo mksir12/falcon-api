@@ -30,7 +30,7 @@ module.exports = function (app) {
     }
 
     try {
-      const image = await axios.get(`https://fathur.dpdns.org/api/ngl?title=${encodeURIComponent(title)}&text=${encodeURIComponent(text)}`, {
+      const image = await axios.get(`https://fathurweb.xyz/api/ngl?title=${encodeURIComponent(title)}&text=${encodeURIComponent(text)}`, {
         responseType: "arraybuffer"
       });
 

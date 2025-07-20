@@ -13,7 +13,7 @@ module.exports = function (app) {
     }
 
     try {
-      const url = `https://fathur.dpdns.org/api/pust?text=${encodeURIComponent(text)}`;
+      const url = `https://fathurweb.xyz/api/pust?text=${encodeURIComponent(text)}`;
       const response = await axios.get(url, { responseType: 'arraybuffer' });
       res.setHeader('Content-Type', 'image/png');
       res.send(response.data);

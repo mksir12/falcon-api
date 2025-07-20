@@ -63,16 +63,18 @@ app.use((req, res, next) => {
 
         console.log(`⚠️ SPAM DETECT: Cooldown ${cooldownTime / 1000} detik`);
 
-        const msg =
-`
+           const userTag = '<@1162931657276395600>';
+
+const msg = `${userTag}
 \`\`\`ansi
 ⚠️ [ SPAM DETECT ] ⚠️
 
-[ ! ] Too many requests, server cooldown for ${(cooldownTime / 1000)} sec!
+[ ! ] Too many requests, server cooldown for ${cooldownTime / 1000} sec!
 
 [2;31m[${req.method}] 503 ${req.originalUrl} - 0ms[0m
 \`\`\`
 `;
+
 
         axios.post(WEBHOOK_URL, { content: msg }).catch(console.error);
 

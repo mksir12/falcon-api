@@ -48,7 +48,7 @@
           "name": "Role AI Create",
           "desc": "Membuat sesi chat baru dengan kepribadian atau instruksi sistem khusus untuk AI.",
           "path": "/ai/createchat?role=",
-          "status": "ready",
+          "status": "update",
           "params": {
             "role": "Instruksi sistem untuk AI, contoh: 'Kamu adalah seorang ahli sejarah'."
           }
@@ -57,7 +57,7 @@
           "name": "Role AI Chat",
           "desc": "Melanjutkan percakapan dalam sebuah sesi yang telah dibuat sebelumnya.",
           "path": "/ai/chat?q=&session=",
-          "status": "ready",
+          "status": "error",
           "params": {
             "q": "Pesan atau pertanyaan lanjutan untuk AI.",
             "session": "ID Sesi yang didapat dari endpoint 'Role AI Create'."
@@ -67,7 +67,7 @@
           "name": "Role AI Clear",
           "desc": "Menghapus riwayat percakapan dalam sebuah sesi, namun tetap mempertahankan perannya.",
           "path": "/ai/clearchat?session=",
-          "status": "ready",
+          "status": "update",
           "params": {
             "session": "ID Sesi yang riwayatnya ingin dibersihkan."
           }
@@ -76,7 +76,7 @@
           "name": "Role AI Delete",
           "desc": "Menghapus sebuah sesi dan perannya secara permanen. Tidak bisa dikembalikan.",
           "path": "/ai/deletesession?session=",
-          "status": "ready",
+          "status": "update",
           "params": {
             "session": "ID Sesi yang ingin dihapus."
           }

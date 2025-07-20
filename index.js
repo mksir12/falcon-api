@@ -10,10 +10,49 @@ require("./function.js");
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// Ganti webhook discord lu disini:
+// Ganti webhook Discord lu disini:
 const WEBHOOK_URL = 'https://discord.com/api/webhooks/1396122030163628112/-vEj4HjREjbaOVXDu5932YjeHpTkjNSKyUKugBFF9yVCBeQSrdgK8qM3HNxVYTOD5BYP';
 
-// Global Cooldown Vars
+// Buffer untuk batch log
+let logBuffer = [];
+
+
+// Kirim batch tiap detik
+setInterval(() => {
+    if (logBuffer.length === 0) return;
+
+   
+
+    const combinedLogs = logBuffer.join('\n');
+    logBuffer = [];
+
+    const payload =
+` \`\`\`ansi
+${combinedLogs}
+\`\`\`
+`;
+
+    axios.post(WEBHOOK_URL, { content: payload }).catch(console.error);
+}, 1000);
+
+// Function log queue
+function queueLog({ method, status, url, duration, error = null }) {
+    let colorCode;
+    if (status >= 500) colorCode = '[2;31m';
+    else if (status >= 400) colorCode = '[2;31m';
+    else if (status === 304) colorCode = '[2;34m';
+    else colorCode = '[2;32m';
+
+    let line = `${colorCode}[${method}] ${status} ${url} - ${duration}ms[0m`;
+
+    if (error) {
+        line += `\n[2;31m[ERROR] ${error.message || error}[0m`;
+    }
+
+    logBuffer.push(line);
+}
+
+// Cooldown vars
 let requestCount = 0;
 let isCooldown = false;
 
@@ -21,31 +60,9 @@ setInterval(() => {
     requestCount = 0;
 }, 1000);
 
-function sendDiscordLog({ method, status, url, duration, error = null }) {
-    let colorCode;
-    if (status >= 500) colorCode = '[2;31m'; // merah
-    else if (status >= 400) colorCode = '[2;31m';
-    else if (status === 304) colorCode = '[2;34m';
-    else colorCode = '[2;32m'; // hijau
-
-    let message =
-` \`\`\`ansi
-${colorCode}[${method}] ${status} ${url} - ${duration}ms[0m
-`;
-
-    if (error) {
-        message += `[2;31m[ERROR] ${error.message || error}[0m\n`;
-    }
-
-    message += "```";
-
-    axios.post(WEBHOOK_URL, { content: message }).catch(console.error);
-}
-
-// Middleware Rate Limit + Cooldown + Discord Log
 app.use((req, res, next) => {
     if (isCooldown) {
-        sendDiscordLog({
+        queueLog({
             method: req.method,
             status: 503,
             url: req.originalUrl,
@@ -57,15 +74,14 @@ app.use((req, res, next) => {
 
     requestCount++;
 
-    if (requestCount > 25) {
+    if (requestCount > 10) {
         isCooldown = true;
         const cooldownTime = (Math.random() * (120000 - 60000) + 60000).toFixed(3);
 
         console.log(`⚠️ SPAM DETECT: Cooldown ${cooldownTime / 1000} detik`);
-
-           const userTag = '<@1162931657276395600>';
-
-const msg = `${userTag}
+const userTag = '<@1162931657276395600>';
+        const spamMsg =
+`${userTag}
 \`\`\`ansi
 ⚠️ [ SPAM DETECT ] ⚠️
 
@@ -75,8 +91,7 @@ const msg = `${userTag}
 \`\`\`
 `;
 
-
-        axios.post(WEBHOOK_URL, { content: msg }).catch(console.error);
+        axios.post(WEBHOOK_URL, { content: spamMsg }).catch(console.error);
 
         setTimeout(() => {
             isCooldown = false;
@@ -100,7 +115,7 @@ const settingsPath = path.join(__dirname, './assets/settings.json');
 const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
 global.apikey = settings.apiSettings.apikey;
 
-// Custom Log + Wrap res.json + Discord Log semua response
+// Custom Log + Wrap res.json + Batch log semua response
 app.use((req, res, next) => {
     console.log(chalk.bgHex('#FFFF99').hex('#333').bold(` Request Route: ${req.path} `));
     global.totalreq += 1;
@@ -108,7 +123,6 @@ app.use((req, res, next) => {
     const start = Date.now();
     const originalJson = res.json;
 
-    // Wrap res.json untuk nambah creator
     res.json = function (data) {
         if (data && typeof data === 'object') {
             const responseData = {
@@ -121,11 +135,10 @@ app.use((req, res, next) => {
         return originalJson.call(this, data);
     };
 
-    // Log semua response saat finish
     res.on('finish', () => {
         const duration = Date.now() - start;
 
-        sendDiscordLog({
+        queueLog({
             method: req.method,
             status: res.statusCode,
             url: req.originalUrl,
@@ -169,9 +182,9 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'api-page', 'index.html'));
 });
 
-// Error handler 404 & 500 + Discord log
+// Error handler 404 & 500 + batch log
 app.use((req, res, next) => {
-    sendDiscordLog({
+    queueLog({
         method: req.method,
         status: 404,
         url: req.originalUrl,
@@ -185,7 +198,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
     console.error(err.stack);
 
-    sendDiscordLog({
+    queueLog({
         method: req.method,
         status: 500,
         url: req.originalUrl,

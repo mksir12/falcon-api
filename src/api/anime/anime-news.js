@@ -2,7 +2,7 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 
 module.exports = function (app) {
-  app.get("/anime/beritaanime", async (req, res) => {
+  app.get("/anime/berita", async (req, res) => {
     try {
       const response = await axios.get("https://myanimelist.net/news");
       const $ = cheerio.load(response.data);

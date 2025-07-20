@@ -1,8 +1,8 @@
-const axios = require("axios");
+taconst axios = require("axios");
 const cheerio = require("cheerio");
 
 module.exports = function (app) {
-  app.get("/anime/berita", async (req, res) => {
+  app.get("/anime/beritaanime", async (req, res) => {
     const { id } = req.query;
 
     if (!id) {

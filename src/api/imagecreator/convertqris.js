@@ -12,7 +12,7 @@ module.exports = function (app) {
     }
 
     try {
-      const url = `https://canvas-api-seven.vercel.app/api/convertqris?qris=${encodeURIComponent(qris)}&amount=${encodeURIComponent(amount)}${tax ? `&tax=${encodeURIComponent(tax)}` : ""}`;
+      const url = `https://fathurweb.xyz/api/convert?qris=${encodeURIComponent(qris)}&amount=${encodeURIComponent(amount)}${tax ? `&tax=${encodeURIComponent(tax)}` : ""}`;
       const { data } = await axios.get(url, { responseType: "arraybuffer" });
 
       res.writeHead(200, {

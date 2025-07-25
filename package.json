@@ -7,6 +7,9 @@
   "scripts": {
     "start": "node --no-deprecation index.js"
   },
+  "engines": {
+  "node": ">=20"
+  },
   "author": "Skyzopedia",
   "license": "MIT",
   "dependencies": {

@@ -2,52 +2,84 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 
 module.exports = function (app) {
-  app.get("/download/spotify", async (req, res) => {
+  
+  // --------- GET /ai/spotify ----------
+  app.get("/ai/spotify", async (req, res) => {
     const { url } = req.query;
 
     if (!url) {
       return res.status(400).json({
         status: false,
-        message: "Parameter 'url' wajib diisi (link Spotify)"
+        creator: "JerryCoder",
+        telegram: "@oggy_workshop",
+        message: "Parameter 'url' wajib diisi."
       });
     }
 
     try {
       const result = await spotifydl(url);
 
-      if (!result || !result.download_url) {
-        return res.status(404).json({
-          status: false,
-          message: "Gagal mengambil data lagu dari Spotify."
-        });
-      }
-
-      res.json({
+      return res.json({
         status: true,
-        creator: "FlowFalcon",
-        result: {
-          title: result.name,
-          artist: result.artists,
-          album: result.album_name,
-          releaseDate: result.release_date,
-          cover: result.cover_url,
-          download_url: result.download_url
-        }
+        creator: "JerryCoder",
+        telegram: "@oggy_workshop",
+        result
       });
 
-    } catch (e) {
-      res.status(500).json({
+    } catch (err) {
+      return res.status(500).json({
         status: false,
-        message: "Terjadi kesalahan saat memproses permintaan.",
-        error: e.message || e
+        creator: "JerryCoder",
+        telegram: "@oggy_workshop",
+        message: "Gagal memproses permintaan",
+        error: err.message
       });
     }
   });
+
+
+  // --------- POST /ai/spotify ----------
+  app.post("/ai/spotify", async (req, res) => {
+    const { url } = req.body || {};
+
+    if (!url) {
+      return res.status(400).json({
+        status: false,
+        creator: "JerryCoder",
+        telegram: "@oggy_workshop",
+        message: "Parameter 'url' wajib diisi."
+      });
+    }
+
+    try {
+      const result = await spotifydl(url);
+
+      return res.json({
+        status: true,
+        creator: "JerryCoder",
+        telegram: "@oggy_workshop",
+        result
+      });
+
+    } catch (err) {
+      return res.status(500).json({
+        status: false,
+        creator: "JerryCoder",
+        telegram: "@oggy_workshop",
+        message: "Gagal memproses hijj jerr",
+        error: err.message
+      });
+    }
+  });
+
 };
 
 
 
-// -------------- SPOTIFY SCRAPER (spotdl.io) --------------
+// ---------------------------------------------------------
+// SPOTIFY DOWNLOADER - SAME LOGIC (spotdl.io) 
+// Converted into model-style module usage
+// ---------------------------------------------------------
 async function spotifydl(url) {
   if (!url || !url.includes("open.spotify.com")) {
     throw new Error("Invalid Spotify URL");
@@ -84,7 +116,7 @@ async function spotifydl(url) {
       download_url: dl.url
     };
 
-  } catch (err) {
-    throw new Error(err.message);
+  } catch (error) {
+    throw new Error(error.message);
   }
 }

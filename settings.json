@@ -23,7 +23,16 @@
           "params": {
             "text": "Teks atau perintah untuk chat AI"
           }
-        }, 
+        },
+        {
+          "name": "Tiktok",
+          "desc": "Downloader tiktok",
+          "path": "/download/tiktok?url=",
+          "status": "ready",
+          "params": {
+            "url": "URL video TikTok"
+          }
+        },
         {
           "name": "Deepseek",
           "desc": "Deepseek ai",
@@ -32,7 +41,7 @@
           "params": {
             "text": "Teks atau perintah untuk chat AI Deepseek"
           }
-        }        
+        }
       ]
     },
     {
